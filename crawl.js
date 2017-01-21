@@ -134,7 +134,7 @@ module.exports = (function () {
                                     var $ = cheerio.load(res.body);
                                     console.log($('title').text())
                                     //iterate players
-                                    $('.r1, .r2').each(function (j, elem) {
+                                    $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
                                         var playerName = $(row).find('td.playerCompare').text().trim();
@@ -143,6 +143,8 @@ module.exports = (function () {
                                         var position = $(row).find('td.left').last().text();
                                         var points = $(row).find('td.right').first().text();
                                         var value = $(row).find('td.right').last().text();
+
+                                        //not working for es
                                         var matchDay = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
 
                                         var player = {
