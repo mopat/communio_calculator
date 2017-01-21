@@ -18,7 +18,7 @@ module.exports = (function () {
         // Model our Schema
         var matchday_details = mongoose.Schema({
             position: String,
-            points: String,
+            points: [],
             matchday_num: String,
             value: String,
             squad: String
@@ -29,7 +29,9 @@ module.exports = (function () {
             url: String,
             full_url: String,
             comunio_id: String,
-            matchday_details: matchday_details
+            matchday_details: matchday_details,
+            started_at: String,
+            last_points: Number
         });
 
         var squadSchema = mongoose.Schema({
@@ -86,6 +88,7 @@ module.exports = (function () {
         });
     }
 
+
     function getAllSquads() {
         return new Promise(function (resolve, reject) {
             Squad.find({}, function (err, squads) {
@@ -97,7 +100,6 @@ module.exports = (function () {
             });
         })
     }
-
 
 
     function getBeerByManufacturer(manufacturer) {
@@ -148,6 +150,40 @@ module.exports = (function () {
         });
     }
 
+    function updatePlayer(updatePlayer) {
+        // console.log(player.comunio_id, player.matchday_details.points)
+        return new Promise(function (resolve, reject) {
+            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
+                var lastMatchDayPoints = parseInt(player.players[0].matchday_details.points[player.players[0].matchday_details.points.length - 1]);
+                console.log(updatePlayer.matchday_details.points)
+                //var currentMatchdayPoints = updatePlayer.
+                if (parseInt(updatePlayer.matchday_details.points) != parseInt(lastMatchDayPoints)) {
+
+                }
+                var pointsDif = parseInt(updatePlayer.matchday_details.points) - parseInt(lastMatchDayPoints);
+                console.log(parseInt(updatePlayer.matchday_details.points), parseInt(lastMatchDayPoints));
+                Squad.findByIdAndUpdate(mongoose.Types.ObjectId(player._id), {$push: {points: tag}}, {
+                    safe: true,
+                    upsert: true,
+                    new: true
+                }, function (err, beer) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(beer);
+                    }
+                })
+                // console.log(player)
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(player);
+                }
+            });
+        });
+    }
+
     function getPlayerByName(name) {
         return new Promise(function (resolve, reject) {
             Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
@@ -187,5 +223,6 @@ module.exports = (function () {
     that.getPlayerByName = getPlayerByName;
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
+    that.updatePlayer = updatePlayer;
     return that;
 })();

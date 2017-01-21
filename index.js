@@ -20,7 +20,18 @@ app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 app.get("/", function () {
     res.end('API START')
 });
-
+app.get("/update_squads", function (req, res) {
+    crawl.updateSquads().then(function (squads) {
+        if (squads.length == 0) {
+            res.end('No beer in database');
+        }
+        else
+            res.json(squads);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
 app.get("/squads", function (req, res) {
     database.getAllSquads().then(function (squads) {
         if (squads.length == 0) {
@@ -34,6 +45,18 @@ app.get("/squads", function (req, res) {
     });
 });
 
+app.get("/init_squads", function (req, res) {
+    crawl.initSquads().then(function (squads) {
+        if (squads.length == 0) {
+            res.end('No beer in database');
+        }
+        else
+            res.json(squads);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
 app.get("/squads/:name", function (req, res) {
     var name = req.params.name;
     database.getSquadByName(name).then(function (squad) {
