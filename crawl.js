@@ -5,6 +5,10 @@ var Crawler = require("crawler");
 var cheerio = require('cheerio');
 var url = require('url');
 
+var config = require("./Config.json");
+var database = require("./Database.js");
+
+
 var COMSTATS_URL = 'http://www.comstats.de';
 var COMSTATS_SQUAD_URL = 'http://www.comstats.de/squad';
 
@@ -12,7 +16,13 @@ module.exports = (function () {
     var that = {},
         c = null;
     init();
-
+    database.init(config);
+    database.connect().then(function () {
+        console.log("Database connection success!");
+    }).catch(function (err) {
+        console.log("There was an error!");
+        console.log(err);
+    });
     function init() {
         c = new Crawler({
             maxConnections: 500,
@@ -74,8 +84,11 @@ module.exports = (function () {
         });
     }
 
+    function updateMatchday() {
+        
+    }
     //for storing ion database
-    function squads() {
+    function initSquads() {
         var squads = [];
         return new Promise(function (resolve, reject) {
             var builtSquads = [];
@@ -97,11 +110,13 @@ module.exports = (function () {
                                 var squadUrl = $(this).attr('href');
                                 var squadName = $(this).find('img').attr('title');
                                 var imageUrl = $(this).find('img').attr('src');
+                                var season = "16/17";
                                 var squad = {
                                     name: squadName,
                                     url: squadUrl,
                                     full_url: COMSTATS_URL + squadUrl,
                                     image_url: imageUrl,
+                                    season: season,
                                     players: []
                                 };
                                 squads.push(squad);
@@ -145,18 +160,22 @@ module.exports = (function () {
                                         var value = $(row).find('td.right').last().text();
 
                                         //not working for es
-                                        var matchDay = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
+                                        var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
+
+                                        var matchdayDetails = {
+                                            position: position,
+                                            points: points,
+                                            matchday_num: matchDayNum,
+                                            value: value,
+                                            squad: currentSquad.name
+                                        };
 
                                         var player = {
                                             name: playerName,
                                             url: url,
                                             comunio_id: comunio_id,
                                             full_url: COMSTATS_URL + url,
-                                            position: position,
-                                            points: points,
-                                            match_day: matchDay,
-                                            value: value,
-                                            team: currentSquad.name
+                                            matchday_details: matchdayDetails
                                         };
 
                                         if (player.name != "") {
@@ -164,7 +183,7 @@ module.exports = (function () {
                                             // console.log(currentSquad.name)
                                         }
                                     });
-
+                                    database.insertSquad(currentSquad);
                                     builtSquads.push(currentSquad);
                                     if (count < squads.length - 1) {
                                         count++;
@@ -206,7 +225,6 @@ module.exports = (function () {
         html: '<p>This is a <strong>test</strong></p>'
     }]);
     that.init = init;
-    that.squads = squads;
     that.listSquads = listSquads;
     return that;
 })();

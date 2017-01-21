@@ -3,7 +3,8 @@
  */
 var mongoose = require("mongoose");
 
-var squad;
+var Squad;
+var Player;
 
 module.exports = (function () {
     var that = {},
@@ -15,15 +16,34 @@ module.exports = (function () {
         url = "mongodb://" + config.host + ":" + config.port + "/" + config.database;
 
         // Model our Schema
-        var BeerSchema = mongoose.Schema({
-            name: String,
-            manufacturer: String,
-            age: Date,
-            city: String,
-            tags: [String]
+        var matchday_details = mongoose.Schema({
+            position: String,
+            points: String,
+            matchday_num: String,
+            value: String,
+            squad: String
         });
+
+        var playerSchema = mongoose.Schema({
+            name: String,
+            url: String,
+            full_url: String,
+            comunio_id: String,
+            matchday_details: matchday_details
+        });
+
+        var squadSchema = mongoose.Schema({
+            name: String,
+            url: String,
+            full_url: String,
+            image_url: String,
+            season: String,
+            players: [playerSchema]
+        });
+        squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
-        Beer = mongoose.model("Beer", BeerSchema);
+        Player = mongoose.model("Player", squadSchema);
+        Squad = mongoose.model("Squad", squadSchema);
     }
 
     function connect() {
@@ -44,29 +64,41 @@ module.exports = (function () {
         });
     }
 
-    function getAllBeers() {
+    function insertSquad(squadObj) {
+        // console.log(squadObj)
+        var squad = new Squad(squadObj);
         return new Promise(function (resolve, reject) {
-            Beer.find({}, function (err, beer) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(beer);
+            Squad.count({name: squadObj.name}, function (err, count) {
+                console.log(count)
+                if (count == 0) {
+                    squad.save(function (err, squad) {
+                        console.log(squad);
+                        if (err) {
+                            reject(err);
+                        }
+                        else {
+                            resolve(squad);
+                        }
+                    });
                 }
+                else resolve([]);
             });
         });
     }
 
-    function getBeerByName(name) {
+    function getAllSquads() {
         return new Promise(function (resolve, reject) {
-            Beer.find({name: name}, function (err, beer) {
+            Squad.find({}, function (err, squads) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(beer);
+                    resolve(squads);
                 }
             });
-        });
+        })
     }
+
+
 
     function getBeerByManufacturer(manufacturer) {
         return new Promise(function (resolve, reject) {
@@ -76,35 +108,6 @@ module.exports = (function () {
                 } else {
                     resolve(beer);
                 }
-            });
-        });
-    }
-
-    //example-data
-    /*
-     {
-     "name": "Mooser Liesl",
-     "manufacturer": "Arcobräu",
-     "age":  -3785462746000 , //="1850-01-16T18:34:14.000Z"
-     "city": "Mooos",
-     "tags": ["Moos", "Liesl", "Helles"]
-     }
-     */
-    function insertBeer(beerObj) {
-        var beer = new Beer(beerObj);
-        return new Promise(function (resolve, reject) {
-            Beer.count({name: beerObj.name}, function (err, count) {
-                if (count == 0) {
-                    beer.save(function (err, beer) {
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            resolve(beer);
-                        }
-                    });
-                }
-                else resolve([]);
             });
         });
     }
@@ -134,11 +137,27 @@ module.exports = (function () {
     }
 
     function getSquadByName(name) {
-
+        return new Promise(function (resolve, reject) {
+            Squad.find({name: name}, function (err, squad) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(squad);
+                }
+            });
+        });
     }
 
     function getPlayerByName(name) {
-
+        return new Promise(function (resolve, reject) {
+            Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(player);
+                }
+            });
+        });
     }
 
     function deleteBeer(id) {
@@ -160,12 +179,13 @@ module.exports = (function () {
 
     that.init = init;
     that.connect = connect;
-    that.getAllBeers = getAllBeers;
-    that.insertBeer = insertBeer;
+    that.getAllSquads = getAllSquads;
     that.deleteBeer = deleteBeer;
     that.addTagToBeer = addTagToBeer;
     that.getBeerByManufacturer = getBeerByManufacturer;
-    that.getBeerByName = getBeerByName;
+    that.getSquadByName = getSquadByName;
+    that.getPlayerByName = getPlayerByName;
     that.isConnected = isConnected;
+    that.insertSquad = insertSquad;
     return that;
 })();

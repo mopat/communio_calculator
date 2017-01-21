@@ -1,5 +1,5 @@
 {
     "host": "localhost",
     "port": 27017,
-    "database": "beers"
+    "database": "comstats_16_17"
 }
