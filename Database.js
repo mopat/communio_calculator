@@ -162,7 +162,10 @@ module.exports = (function () {
                 }
                 var pointsDif = parseInt(updatePlayer.matchday_details.points) - parseInt(lastMatchDayPoints);
                 console.log(parseInt(updatePlayer.matchday_details.points), parseInt(lastMatchDayPoints));
-                Squad.findByIdAndUpdate(mongoose.Types.ObjectId(player._id), {$push: {points: tag}}, {
+                Squad.findByIdAndUpdate(mongoose.Types.ObjectId(player._id), {
+                    $push: {points: updatePlayer.points},
+                    $set: {last_points: pointsDif}
+                }, {
                     safe: true,
                     upsert: true,
                     new: true
@@ -174,12 +177,7 @@ module.exports = (function () {
                         resolve(beer);
                     }
                 })
-                // console.log(player)
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(player);
-                }
+             
             });
         });
     }
