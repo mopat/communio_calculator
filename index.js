@@ -58,6 +58,8 @@ app.get("/init_squads", function (req, res) {
         res.sendStatus(500);
     });
 });
+
+
 app.get("/squads/:name", function (req, res) {
     var name = req.params.name;
     database.getSquadByName(name).then(function (squad) {
@@ -69,9 +71,31 @@ app.get("/squads/:name", function (req, res) {
     })
 });
 
-app.get("/player/:name", function (req, res) {
+app.get("/players/:name", function (req, res) {
     var name = req.params.name;
     database.getPlayerByName(name).then(function (player) {
+        if (player.length == 0) {
+            res.end('No beer in database');
+        }
+        else
+            res.json(player);
+    })
+});
+
+app.get("/points/player", function (req, res) {
+    var name = req.query.name;
+    database.getLastPointsByPlayerName(name).then(function (player) {
+        if (player.length == 0) {
+            res.end('No beer in database');
+        }
+        else
+            res.json(player);
+    })
+});
+
+app.get("/points/player/:id", function (req, res) {
+    var id = req.params.id;
+    database.getLastPointsByPlayerID(id).then(function (player) {
         if (player.length == 0) {
             res.end('No beer in database');
         }

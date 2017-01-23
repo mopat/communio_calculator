@@ -166,7 +166,7 @@ module.exports = (function () {
     function getSquadLastWeekPoints(squadName) {
         //  console.log(squadName)
         return new Promise(function (resolve, reject) {
-            Squad.find({name: squadName}, {"_id": 0, "last_points": 1}, function (err, points) {
+            Squad.find({name: squadName}, {_id: 0, last_points: 1}, function (err, points) {
                 console.log(points);
                 resolve(points);
             });
@@ -237,6 +237,30 @@ module.exports = (function () {
         });
     }
 
+    function getLastPointsByPlayerName(name){
+        return new Promise(function (resolve, reject) {
+            Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(player.players[0].last_points);
+                }
+            });
+        });
+    }
+
+    function getLastPointsByPlayerID(id){
+        return new Promise(function (resolve, reject) {
+            Squad.findOne({"players._id": id}, {'players.$': 1}, function (err, player) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(player.players[0].last_points);
+                }
+            });
+        });
+    }
+
     function deleteBeer(id) {
         return new Promise(function (resolve, reject) {
             Beer.findByIdAndRemove(mongoose.Types.ObjectId(id), function (err, beer) {
@@ -266,5 +290,7 @@ module.exports = (function () {
     that.insertSquad = insertSquad;
     that.updatePlayer = updatePlayer;
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
+    that.getLastPointsByPlayerName = getLastPointsByPlayerName;
+    that.getLastPointsByPlayerID = getLastPointsByPlayerID;
     return that;
 })();
