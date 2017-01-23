@@ -84,11 +84,11 @@ module.exports = (function () {
         });
     }
 
+
     //for storing ion database
     function updateSquads() {
         var squads = [];
         return new Promise(function (resolve, reject) {
-            var builtSquads = [];
             c.queue([{
                 uri: COMSTATS_SQUAD_URL,
                 jQuery: false,
@@ -139,13 +139,16 @@ module.exports = (function () {
                             })(currentSquad);//passing in variable to var here
 
                             function callback(error, res, done) {
-                                console.log(currentSquad.name)
+                                database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
+                                    console.log(points)
+                                });
+                                //console.log(currentSquad.name);
                                 if (error) {
                                     console.log(error);
                                 } else {
                                     var $ = cheerio.load(res.body);
-                                    console.log($('title').text())
                                     //iterate players
+                                    var newPoints = $('.rangliste').find('td.bold.right').first().text();
                                     $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
@@ -155,6 +158,7 @@ module.exports = (function () {
                                         var position = $(row).find('td.left').last().text();
                                         var points = $(row).find('td.right').first().text();
                                         var value = $(row).find('td.right').last().text();
+                                        console.log()
 
                                         //not working for es
                                         var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
@@ -162,7 +166,7 @@ module.exports = (function () {
                                         var matchdayDetails = {
                                             position: position,
                                             points: points,
-                                            matchday_num: matchDayNum,
+                                            matchday_num: parseInt(matchDayNum),
                                             value: value,
                                             squad: currentSquad.name
                                         };
@@ -170,6 +174,7 @@ module.exports = (function () {
                                         var player = {
                                             name: playerName,
                                             url: url,
+                                            squad_points: newPoints,
                                             comunio_id: comunio_id,
                                             full_url: COMSTATS_URL + url,
                                             matchday_details: matchdayDetails
@@ -183,7 +188,6 @@ module.exports = (function () {
 
                                     });
 
-                                    builtSquads.push(currentSquad);
                                     if (count < squads.length - 1) {
                                         count++;
                                         loadPlayers();
@@ -192,11 +196,10 @@ module.exports = (function () {
                                         if (error) {
                                             reject(error);
                                         } else {
-                                            resolve(builtSquads);
+                                            resolve(database.getAllSquads());
                                         }
                                         done();
                                     }
-                                    //  console.log(currentSquad);
                                 }
 
                             }
@@ -208,6 +211,7 @@ module.exports = (function () {
             ]);
         });
     }
+
     //for storing ion database
     function initSquads() {
         var squads = [];
@@ -238,6 +242,7 @@ module.exports = (function () {
                                     full_url: COMSTATS_URL + squadUrl,
                                     image_url: imageUrl,
                                     season: season,
+                                    last_points: 0,
                                     players: []
                                 };
                                 squads.push(squad);
@@ -268,8 +273,8 @@ module.exports = (function () {
                                     console.log(error);
                                 } else {
                                     var $ = cheerio.load(res.body);
-                                    console.log($('title').text())
                                     //iterate players
+                                    var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
                                     $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
@@ -277,6 +282,7 @@ module.exports = (function () {
                                         var url = $(row).find('td a.nowrap').attr('href');
                                         var comunio_id = $(row).find('div.compare').attr('data-basepid');
                                         var position = $(row).find('td.left').last().text();
+
                                         var points = [];
                                         points.push($(row).find('td.right').first().text());
                                         var value = $(row).find('td.right').last().text();
@@ -287,7 +293,7 @@ module.exports = (function () {
                                         var matchdayDetails = {
                                             position: position,
                                             points: points,
-                                            matchday_num: matchDayNum,
+                                            matchday_num: parseInt(matchDayNum),
                                             value: value,
                                             squad: currentSquad.name
                                         };
@@ -297,12 +303,13 @@ module.exports = (function () {
                                             url: url,
                                             comunio_id: comunio_id,
                                             full_url: COMSTATS_URL + url,
-                                            started_at: matchDayNum,
+                                            started_at: parseInt(matchDayNum),
                                             last_points: 0,
                                             matchday_details: matchdayDetails
                                         };
 
                                         if (player.name != "") {
+                                            currentSquad.last_points = last_points;
                                             currentSquad.players.push(player);
                                             // console.log(currentSquad.name)
                                         }

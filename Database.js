@@ -2,7 +2,7 @@
  * Created by morcz on 21.01.2017.
  */
 var mongoose = require("mongoose");
-
+//mongoose.set('debug', true);
 var Squad;
 var Player;
 var Matchday;
@@ -19,10 +19,12 @@ module.exports = (function () {
         // Model our Schema
         var matchday_details = mongoose.Schema({
             position: String,
-            points: Array,
-            matchday_num: String,
+            points: [Number],
+            matchday_num: Number,
             value: String,
-            squad: String
+            squad: String,
+            created_at: Date,
+            modified_at: Date
         });
 
         var playerSchema = mongoose.Schema({
@@ -30,9 +32,11 @@ module.exports = (function () {
             url: String,
             full_url: String,
             comunio_id: String,
-            started_at: String,
+            started_at: Number,
             last_points: Number,
-            matchday_details: matchday_details
+            matchday_details: matchday_details,
+            created_at: Date,
+            modified_at: Date
         });
 
         var squadSchema = mongoose.Schema({
@@ -41,11 +45,14 @@ module.exports = (function () {
             full_url: String,
             image_url: String,
             season: String,
-            players: [playerSchema]
+            last_points: Number,
+            players: [playerSchema],
+            created_at: Date,
+            modified_at: Date
         });
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
-      //  Matchday = mongoose.model("Matchday", matchday_details);
+        //  Matchday = mongoose.model("Matchday", matchday_details);
         //Player = mongoose.model("Player", squadSchema);
         Squad = mongoose.model("Squad", squadSchema);
     }
@@ -156,31 +163,64 @@ module.exports = (function () {
         });
     }
 
-    function updatePlayer(updatePlayer) {
-        // console.log(player.comunio_id, player.matchday_details.points)
-        //console.log(updatePlayer)
+    function getSquadLastWeekPoints(squadName) {
+        //  console.log(squadName)
         return new Promise(function (resolve, reject) {
+            Squad.find({name: squadName}, {"last_points": 1}, function (err, points) {
+                console.log(points);
+                resolve(points);
+            });
+        });
+    }
+
+    function updatePlayer(updatePlayer) {
+        return new Promise(function (resolve, reject) {
+            //  console.log(updatePlayer);
+            if (updatePlayer.squad_points == "/") {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(player);
+                }
+            }
 
             Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-                console.log(player)
                 //console.log(player)
-                var _id = player.players[0]._id;
-                var last_points =player.players[0].last_points;
-                console.log(last_points)
-                //console.log(player.players[0].matchday_details)
+                //  console.log(player)
+                var newMatchdayNum = parseInt(updatePlayer.matchday_details.matchday_num);
+                newMatchdayNum += 1;
+                if (newMatchdayNum > player.players[0].matchday_details.matchday_num) {
+                    var _id = player.players[0]._id;
+                    //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}}, {new: true, upsert: true})
+                    //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}, $push:{"players.$.matchday_details.points": 15}}, {new: true, upsert: true})
 
-                var matchdayId = player.players[0].matchday_details._id;
-               // console.log(_id, matchdayId)
-                //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}}, {new: true, upsert: true})
-                //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}, $push:{"players.$.matchday_details.points": 15}}, {new: true, upsert: true})
-         Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {$set: {"players.$.last_points": 33}}, {
-                    safe: true,
-                    upsert: true,
-                    new: true
-                }, function (err, player) {
-
-                    console.log(player)
-                })
+                    var lastMatchdayPoints = player.players[0].matchday_details.points[player.players[0].matchday_details.points.length - 1];
+                    var thisMatchdayPoints = updatePlayer.matchday_details.points;
+                    var thisMatchdayPoints = parseInt(lastMatchdayPoints) + Math.floor((Math.random() * 10) + 1);
+                    var newPoints = thisMatchdayPoints - lastMatchdayPoints;
+                    console.log(newPoints)
+                    Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
+                        $set: {
+                            "players.$.last_points": newPoints,
+                            "players.$.matchday_details.matchday_num": newMatchdayNum
+                        },
+                        $push: {"players.$.matchday_details.points": thisMatchdayPoints}
+                    }, {
+                        safe: true,
+                        upsert: true,
+                        new: true
+                    }, function (err, player) {
+                        //  console.log(player);
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player);
+                        }
+                    })
+                }
+                else {
+                    resolve([]);
+                }
             });
         });
     }
@@ -225,5 +265,6 @@ module.exports = (function () {
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
     that.updatePlayer = updatePlayer;
+    that.getSquadLastWeekPoints = getSquadLastWeekPoints;
     return that;
 })();
