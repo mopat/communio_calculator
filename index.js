@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 app.get("/", function () {
     res.end('API START')
 });
+
 app.get("/update_squads", function (req, res) {
     crawl.updateSquads().then(function (squads) {
         if (squads.length == 0) {

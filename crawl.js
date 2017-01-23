@@ -297,9 +297,9 @@ module.exports = (function () {
                                             url: url,
                                             comunio_id: comunio_id,
                                             full_url: COMSTATS_URL + url,
-                                            matchday_details: matchdayDetails,
                                             started_at: matchDayNum,
-                                            last_points: 0
+                                            last_points: 0,
+                                            matchday_details: matchdayDetails
                                         };
 
                                         if (player.name != "") {

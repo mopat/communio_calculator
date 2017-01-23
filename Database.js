@@ -5,6 +5,7 @@ var mongoose = require("mongoose");
 
 var Squad;
 var Player;
+var Matchday;
 
 module.exports = (function () {
     var that = {},
@@ -18,7 +19,7 @@ module.exports = (function () {
         // Model our Schema
         var matchday_details = mongoose.Schema({
             position: String,
-            points: [],
+            points: Array,
             matchday_num: String,
             value: String,
             squad: String
@@ -29,9 +30,9 @@ module.exports = (function () {
             url: String,
             full_url: String,
             comunio_id: String,
-            matchday_details: matchday_details,
             started_at: String,
-            last_points: Number
+            last_points: Number,
+            matchday_details: matchday_details
         });
 
         var squadSchema = mongoose.Schema({
@@ -44,7 +45,8 @@ module.exports = (function () {
         });
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
-        Player = mongoose.model("Player", squadSchema);
+      //  Matchday = mongoose.model("Matchday", matchday_details);
+        //Player = mongoose.model("Player", squadSchema);
         Squad = mongoose.model("Squad", squadSchema);
     }
 
@@ -69,14 +71,18 @@ module.exports = (function () {
     function insertSquad(squadObj) {
         // console.log(squadObj)
         var squad = new Squad(squadObj);
+        console.log(squadObj.name)
         return new Promise(function (resolve, reject) {
             Squad.count({name: squadObj.name}, function (err, count) {
-                console.log(count)
+                //console.log(count)
+                //console.log(squad);
                 if (count == 0) {
                     squad.save(function (err, squad) {
-                        console.log(squad);
+                        // console.log(squad);
                         if (err) {
+                            console.log(err)
                             reject(err);
+
                         }
                         else {
                             resolve(squad);
@@ -152,32 +158,29 @@ module.exports = (function () {
 
     function updatePlayer(updatePlayer) {
         // console.log(player.comunio_id, player.matchday_details.points)
+        //console.log(updatePlayer)
         return new Promise(function (resolve, reject) {
-            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-                var lastMatchDayPoints = parseInt(player.players[0].matchday_details.points[player.players[0].matchday_details.points.length - 1]);
-                console.log(updatePlayer.matchday_details.points)
-                //var currentMatchdayPoints = updatePlayer.
-                if (parseInt(updatePlayer.matchday_details.points) != parseInt(lastMatchDayPoints)) {
 
-                }
-                var pointsDif = parseInt(updatePlayer.matchday_details.points) - parseInt(lastMatchDayPoints);
-                console.log(parseInt(updatePlayer.matchday_details.points), parseInt(lastMatchDayPoints));
-                Squad.findByIdAndUpdate(mongoose.Types.ObjectId(player._id), {
-                    $push: {points: updatePlayer.points},
-                    $set: {last_points: pointsDif}
-                }, {
+            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
+                console.log(player)
+                //console.log(player)
+                var _id = player.players[0]._id;
+                var last_points =player.players[0].last_points;
+                console.log(last_points)
+                //console.log(player.players[0].matchday_details)
+
+                var matchdayId = player.players[0].matchday_details._id;
+               // console.log(_id, matchdayId)
+                //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}}, {new: true, upsert: true})
+                //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}, $push:{"players.$.matchday_details.points": 15}}, {new: true, upsert: true})
+         Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {$set: {"players.$.last_points": 33}}, {
                     safe: true,
                     upsert: true,
                     new: true
-                }, function (err, beer) {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        resolve(beer);
-                    }
+                }, function (err, player) {
+
+                    console.log(player)
                 })
-             
             });
         });
     }
