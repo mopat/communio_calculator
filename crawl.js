@@ -139,13 +139,19 @@ module.exports = (function () {
                             })(currentSquad);//passing in variable to var here
 
                             function callback(error, res, done) {
-                                database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
-                                    console.log(points)
-                                });
+
                                 //console.log(currentSquad.name);
                                 if (error) {
                                     console.log(error);
                                 } else {
+                                    database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
+                                        console.log(points.last_points);
+                                        var newPoints = $('.rangliste').find('td.bold.right').first().text();
+                                        if (newPoints == points.last_points) {
+                                            console.log("GLEICH")
+                                        }
+                                        //Überprüfen pb points gleich
+                                    });
                                     var $ = cheerio.load(res.body);
                                     //iterate players
                                     var newPoints = $('.rangliste').find('td.bold.right').first().text();

@@ -166,7 +166,7 @@ module.exports = (function () {
     function getSquadLastWeekPoints(squadName) {
         //  console.log(squadName)
         return new Promise(function (resolve, reject) {
-            Squad.find({name: squadName}, {"last_points": 1}, function (err, points) {
+            Squad.find({name: squadName}, {"_id": 0, "last_points": 1}, function (err, points) {
                 console.log(points);
                 resolve(points);
             });
