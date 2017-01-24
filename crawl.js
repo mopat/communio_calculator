@@ -74,7 +74,7 @@ module.exports = (function () {
                     if (error) {
                         reject(error);
                     } else {
-                        resolve(squads);
+                        resolve(database.getAllSquads());
                     }
                     done();
                 }
@@ -145,7 +145,8 @@ module.exports = (function () {
                                     console.log(error);
                                 } else {
                                     database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
-                                        console.log(points.last_points);
+                                        var $ = cheerio.load(res.body);
+                                        console.log("POINTS " + points.last_points);
                                         var newPoints = $('.rangliste').find('td.bold.right').first().text();
                                         if (newPoints == points.last_points) {
                                             console.log("GLEICH")
@@ -164,7 +165,7 @@ module.exports = (function () {
                                         var position = $(row).find('td.left').last().text();
                                         var points = $(row).find('td.right').first().text();
                                         var value = $(row).find('td.right').last().text();
-                                        console.log()
+
 
                                         //not working for es
                                         var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
@@ -289,8 +290,7 @@ module.exports = (function () {
                                         var comunio_id = $(row).find('div.compare').attr('data-basepid');
                                         var position = $(row).find('td.left').last().text();
 
-                                        var points = [];
-                                        points.push($(row).find('td.right').first().text());
+                                        var points = $(row).find('td.right').first().text();
                                         var value = $(row).find('td.right').last().text();
 
                                         //not working for es
