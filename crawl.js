@@ -164,7 +164,8 @@ module.exports = (function () {
 
                                         var matchdayDetails = {
                                             position: position,
-                                            points: points,
+                                            points : 0,
+                                            all_points: points,
                                             matchday_num: parseInt(matchDayNum),
                                             value: value,
                                             squad: currentSquad.name
@@ -292,7 +293,8 @@ module.exports = (function () {
 
                                         var matchdayDetails = {
                                             position: position,
-                                            points: points,
+                                            points: 0,
+                                            all_points: points,
                                             matchday_num: parseInt(matchDayNum),
                                             value: value,
                                             squad: currentSquad.name

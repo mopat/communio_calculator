@@ -21,6 +21,7 @@ module.exports = (function () {
         var matchday_details = mongoose.Schema({
             position: String,
             points: Number,
+            all_points: Number,
             matchday_num: Number,
             value: String,
             squad: String,
@@ -190,15 +191,16 @@ module.exports = (function () {
                     //  console.log(player)
                     var newMatchdayNum = parseInt(updatePlayer.matchday_details.matchday_num);
                     newMatchdayNum += 1;
-                    var lastMatchdayPoints = player.players[0].matchday_details[0].points;
-                    var thisMatchdayPoints = updatePlayer.matchday_details.points;
+                    console.log( updatePlayer.matchday_details.all_points)
+                    var lastMatchdayPoints = player.players[0].matchday_details[0].all_points;
+                    var thisMatchdayPoints = updatePlayer.matchday_details.all_points;
                     var thisMatchdayPoints = parseInt(lastMatchdayPoints) + Math.floor((Math.random() * 10) + 1);
-
-
                     var newPoints = thisMatchdayPoints - lastMatchdayPoints;
+                    updatePlayer.matchday_details.points = newPoints;
+
                     // console.log(updatePlayer.comunio_id)
 
-                   
+
 
                     Squad.findOneAndUpdate({"players.comunio_id": player.players[0].comunio_id}, {
                         $set: {
