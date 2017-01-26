@@ -193,12 +193,16 @@ module.exports = (function () {
                     var lastMatchdayPoints = player.players[0].matchday_details[0].points;
                     var thisMatchdayPoints = updatePlayer.matchday_details.points;
                     var thisMatchdayPoints = parseInt(lastMatchdayPoints) + Math.floor((Math.random() * 10) + 1);
+
+
                     var newPoints = thisMatchdayPoints - lastMatchdayPoints;
                     // console.log(updatePlayer.comunio_id)
 
+                   
+
                     Squad.findOneAndUpdate({"players.comunio_id": player.players[0].comunio_id}, {
                         $set: {
-                            "players.$.last_points": 5
+                            "players.$.last_points": newPoints
                         },
                         $push: {"players.$.matchday_details": new Matchday(updatePlayer.matchday_details)}
                     }, {
