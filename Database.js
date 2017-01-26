@@ -2,7 +2,8 @@
  * Created by morcz on 21.01.2017.
  */
 var mongoose = require("mongoose");
-//mongoose.set('debug', true);
+
+
 var Squad;
 var Player;
 var Matchday;
@@ -173,10 +174,55 @@ module.exports = (function () {
         });
     }
 
+    // mongoose.set('debug', true);
+    function updateSquad(squad) {
+        //var squad = new Squad(squadObj);
+        return new Promise(function (resolve, reject) {
+            // console.log(squadObj)
+            //console.log(count)
+            //console.log(squad);
+            for (var i = 0; i < squad.players.length; i++) {
+                var updatePlayer = squad.players[i];
+                console.log(squad.players[i].name)
+                Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
+
+                    //console.log(player)
+                    //  console.log(player)
+                    var newMatchdayNum = parseInt(updatePlayer.matchday_details.matchday_num);
+                    newMatchdayNum += 1;
+                    var lastMatchdayPoints = player.players[0].matchday_details[0].points;
+                    var thisMatchdayPoints = updatePlayer.matchday_details.points;
+                    var thisMatchdayPoints = parseInt(lastMatchdayPoints) + Math.floor((Math.random() * 10) + 1);
+                    var newPoints = thisMatchdayPoints - lastMatchdayPoints;
+                    // console.log(updatePlayer.comunio_id)
+
+                    Squad.findOneAndUpdate({"players.comunio_id": player.players[0].comunio_id}, {
+                        $set: {
+                            "players.$.last_points": 5
+                        },
+                        $push: {"players.$.matchday_details": new Matchday(updatePlayer.matchday_details)}
+                    }, {
+                        safe: true,
+                        upsert: true,
+                        new: true
+                    }, function (err, player) {
+                        if (err) {
+                            console.log(err)
+                        }
+                    })
+                });
+            }
+            resolve(squad.name);
+
+
+        });
+    }
+
     function updatePlayer(updatePlayer) {
         return new Promise(function (resolve, reject) {
             //  console.log(updatePlayer);
             Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
+                console.log(player)
                 //console.log(player)
                 //  console.log(player)
                 var newMatchdayNum = parseInt(updatePlayer.matchday_details.matchday_num);
@@ -212,7 +258,7 @@ module.exports = (function () {
                     }
                 }
                 else {
-                    resolve([]);
+                    resolve("HEAY");
                 }
             });
         });
@@ -285,5 +331,6 @@ module.exports = (function () {
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
     that.getLastPointsByPlayerName = getLastPointsByPlayerName;
     that.getLastPointsByPlayerID = getLastPointsByPlayerID;
+    that.updateSquad = updateSquad;
     return that;
 })();
