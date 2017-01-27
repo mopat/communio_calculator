@@ -21,31 +21,7 @@ app.get("/", function () {
     res.end('API START')
 });
 
-app.get("/update_squads", function (req, res) {
-    crawl.updateSquads().then(function (squads) {
-        if (squads.length == 0) {
-            res.end('No squad updated');
-        }
-        else
-            res.json(squads);
-    }).catch(function (err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
-});
-app.get("/squads", function (req, res) {
-    database.getAllSquads().then(function (squads) {
-        if (squads.length == 0) {
-            res.end('No beer in database');
-        }
-        else
-            res.json(squads);
-    }).catch(function (err) {
-        console.log(err);
-        res.sendStatus(500);
-    });
-});
-
+//UPDATE AND INIT FUNCTIONS -----------------
 app.get("/init_squads", function (req, res) {
     crawl.initSquads().then(function (squads) {
         if (squads.length == 0) {
@@ -59,50 +35,125 @@ app.get("/init_squads", function (req, res) {
     });
 });
 
+app.get("/update_squads", function (req, res) {
+    crawl.updateSquads().then(function (squads) {
+        if (squads.length == 0) {
+            res.end('No squad updated');
+        }
+        else
+            res.json(squads);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
 
-app.get("/squads/:name", function (req, res) {
-    var name = req.params.name;
+//------------------------------------------
+
+// SQUAD Endpoints ------------------------
+
+app.get("/squads", function (req, res, next) {
+    var name = req.query.name;
+    if (name == undefined){
+        next();
+        return;
+    }
+
     database.getSquadByName(name).then(function (squad) {
         if (squad.length == 0) {
-            res.end('No beer in database');
+            res.end('Cannot find squad with name: ' + name);
         }
         else
             res.json(squad);
     })
 });
 
-app.get("/players/:name", function (req, res) {
-    var name = req.params.name;
+
+app.get("/squads", function (req, res) {
+    database.getAllSquads().then(function (squads) {
+        if (squads.length == 0) {
+            res.end('No beer in database');
+        }
+        else
+            res.json(squads);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
+
+
+app.get("/squads/:id", function (req, res) {
+    var id = req.params.id;
+    database.getSquadById(id).then(function (squad) {
+        if (squad.length == 0) {
+            res.end('Cannot find squad with id: ' + id);
+        }
+        else
+            res.json(squad);
+    })
+});
+
+//-----------------------
+
+//PLAYER Endpoints-----------------------
+
+app.get("/players", function (req, res) {
+    var name = req.query.name;
     database.getPlayerByName(name).then(function (player) {
         if (player.length == 0) {
-            res.end('No beer in database');
+            res.end('Cannot find player with name: ' + name);
         }
         else
             res.json(player);
     })
 });
 
-app.get("/points/player", function (req, res) {
-    var name = req.query.name;
-    database.getLastPointsByPlayerName(name).then(function (player) {
+app.get("/players/:id", function (req, res) {
+    var id = req.params.id;
+    database.getPlayerById(id).then(function (player) {
         if (player.length == 0) {
-            res.end('No beer in database');
+            res.end('Cannot find player with name: ' + name);
         }
         else
             res.json(player);
+    })
+});
+//----------------
+
+app.get("/points/player", function (req, res) {
+    var name = req.query.name;
+    database.getLastPointsByPlayerName(name).then(function (points) {
+        if (points.length == 0) {
+            res.end('Cannot find player with name: ' + name);
+        }
+        else
+            res.json(points);
     })
 });
 
 app.get("/points/player/:id", function (req, res) {
     var id = req.params.id;
-    database.getLastPointsByPlayerID(id).then(function (player) {
-        if (player.length == 0) {
-            res.end('No beer in database');
+    database.getLastPointsByPlayerID(id).then(function (points) {
+        if (points.length == 0) {
+            res.end('Cannot find player with id: ' + id);
         }
         else
-            res.json(player);
+            res.json(points);
     })
 });
+
+app.get("/points/squads/:id", function (req, res) {
+    var id = req.params.id;
+    database.getSquadLastWeekPoints(id).then(function (points) {
+        if (points.length == 0) {
+            res.end('Cannot find squad with id: ' + id);
+        }
+        else
+            res.json(points);
+    })
+});
+
 
 app.listen(8000, function () {
     console.log('Listening To Port 8000');

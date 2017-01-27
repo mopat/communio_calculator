@@ -25,8 +25,8 @@ module.exports = (function () {
             matchday_num: Number,
             value: String,
             squad: String,
-            created_at: { type: Date, default: Date.now },
-            updated_at: { type: Date, default: Date.now }
+            created_at: {type: Date, default: Date.now},
+            updated_at: {type: Date, default: Date.now}
         });
 
         var playerSchema = mongoose.Schema({
@@ -37,8 +37,8 @@ module.exports = (function () {
             started_at: Number,
             last_points: Number,
             matchday_details: [matchday_details],
-            created_at: { type: Date, default: Date.now },
-            updated_at: { type: Date, default: Date.now }
+            created_at: {type: Date, default: Date.now},
+            updated_at: {type: Date, default: Date.now}
         });
 
         var squadSchema = mongoose.Schema({
@@ -49,8 +49,8 @@ module.exports = (function () {
             season: String,
             last_points: Number,
             players: [playerSchema],
-            created_at: { type: Date, default: Date.now },
-            updated_at: { type: Date, default: Date.now }
+            created_at: {type: Date, default: Date.now},
+            updated_at: {type: Date, default: Date.now}
         });
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
@@ -100,75 +100,7 @@ module.exports = (function () {
     }
 
 
-    function getAllSquads() {
-        return new Promise(function (resolve, reject) {
-            Squad.find({}, function (err, squads) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(squads);
-                }
-            });
-        })
-    }
 
-
-    function getBeerByManufacturer(manufacturer) {
-        return new Promise(function (resolve, reject) {
-            Beer.find({manufacturer: manufacturer}, function (err, beer) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(beer);
-                }
-            });
-        });
-    }
-
-    // also bei mir hat das auch alles ohne mongoose.Types.ObjectId(id) und nur mit id funktioniert. hab das aber trotzdem noch geändert
-    function addTagToBeer(id, tag) {
-        return new Promise(function (resolve, reject) {
-            Beer.count({tags: {$in: [tag]}, _id: mongoose.Types.ObjectId(id)}, function (err, count) {
-                if (count == 0) {
-                    // {new: true} enables returning the updated document
-                    Beer.findByIdAndUpdate(mongoose.Types.ObjectId(id), {$push: {tags: tag}}, {
-                        safe: true,
-                        upsert: true,
-                        new: true
-                    }, function (err, beer) {
-                        if (err) {
-                            reject(err);
-                        }
-                        else {
-                            resolve(beer);
-                        }
-                    })
-                }
-                else resolve([]);
-            });
-        });
-    }
-
-    function getSquadByName(name) {
-        return new Promise(function (resolve, reject) {
-            Squad.find({name: name}, function (err, squad) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(squad);
-                }
-            });
-        });
-    }
-
-    function getSquadLastWeekPoints(squadName) {
-        //  console.log(squadName)
-        return new Promise(function (resolve, reject) {
-            Squad.find({name: squadName}, {_id: 0, last_points: 1}, function (err, points) {
-                resolve(points[0].last_points);
-            });
-        });
-    }
 
     // mongoose.set('debug', true);
     function updateSquad(squad) {
@@ -180,19 +112,19 @@ module.exports = (function () {
                 var numOfPlayers = squad.players.length;
                 (function (updatePlayer) { //start wrapper code
                     Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-                        var lastMatchdayDetailsNum =  player.players[0].matchday_details.length -1;
+                        var lastMatchdayDetailsNum = player.players[0].matchday_details.length - 1;
                         var lastMatchdayPoints = player.players[0].matchday_details[lastMatchdayDetailsNum].all_points;
                         var thisMatchdayPoints = parseInt(updatePlayer.matchday_details.all_points);
 
                         // --- test
-                       /* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
-                     //   console.log(oldMatchdayNum);
-                        var newMatchdayNum = oldMatchdayNum + 1;
-                        var addPoints = Math.floor((Math.random() * 10) + 1);
-                        thisMatchdayPoints += addPoints;
+                        /* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
+                         //   console.log(oldMatchdayNum);
+                         var newMatchdayNum = oldMatchdayNum + 1;
+                         var addPoints = Math.floor((Math.random() * 10) + 1);
+                         thisMatchdayPoints += addPoints;
 
-                        updatePlayer.matchday_details.all_points = thisMatchdayPoints;
-                        updatePlayer.matchday_details.matchday_num = newMatchdayNum;*/
+                         updatePlayer.matchday_details.all_points = thisMatchdayPoints;
+                         updatePlayer.matchday_details.matchday_num = newMatchdayNum;*/
                         //---
 
                         var points = thisMatchdayPoints - lastMatchdayPoints;
@@ -231,25 +163,67 @@ module.exports = (function () {
     }
 
 
+
+
+    // GET PLAYERS ---------------------
+        mongoose.set('debug', true);
     function getPlayerByName(name) {
+        name = getCaseInsensitive(name);
         return new Promise(function (resolve, reject) {
-            Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(player);
+            Squad.count({"players.name": name}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player);
+                        }
+                    });
                 }
+                else resolve([]);
             });
         });
     }
 
-    function getLastPointsByPlayerName(name) {
+    function getPlayerById(id) {
         return new Promise(function (resolve, reject) {
-            Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(player.players[0].last_points);
+            Squad.count({"players._id": id}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players._id": id}, {'players.$': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player);
+                        }
+                    });
+                }
+                else resolve([]);
+            });
+        });
+    }
+
+    //-----------------------
+
+
+    //-----------------------
+
+    //GET POINTS
+
+    function getLastPointsByPlayerName(name) {
+        name = getCaseInsensitive(name);
+        return new Promise(function (resolve, reject) {
+            Squad.count({"players.name": name}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player.players[0].last_points);
+                        }
+                    });
+                }
+                else {
+                    resolve([])
                 }
             });
         });
@@ -257,15 +231,91 @@ module.exports = (function () {
 
     function getLastPointsByPlayerID(id) {
         return new Promise(function (resolve, reject) {
-            Squad.findOne({"players._id": id}, {'players.$': 1}, function (err, player) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(player.players[0].last_points);
+            Squad.count({"players._id": id}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players._id": id}, {'players.$': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player.players[0].last_points);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
                 }
             });
         });
     }
+
+    /**
+     * @todo
+     * @param squadName
+     * @return {Promise}
+     */
+    function getSquadLastWeekPoints(squadName) {
+        return new Promise(function (resolve, reject) {
+            Squad.find({name: squadName}, {_id: 0, last_points: 1}, function (err, points) {
+                resolve(points[0].last_points);
+            });
+        });
+    }
+    //---------------------------
+
+
+    //GET SQUADS --------------
+    function getAllSquads() {
+        return new Promise(function (resolve, reject) {
+            Squad.find({}, function (err, squads) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(squads);
+                }
+            });
+        })
+    }
+
+
+    function getSquadByName(name) {
+        name = getCaseInsensitive(name);
+        return new Promise(function (resolve, reject) {
+            Squad.count({name: name}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({name: name}, function (err, squad) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(squad);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
+                }
+            });
+        });
+    }
+
+    function getSquadById(id) {
+        return new Promise(function (resolve, reject) {
+            Squad.count({_id: id}, function (err, count) {
+                if (count > 0) {
+                    Squad.find({_id: id}, function (err, squad) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(squad);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
+                }
+            });
+        });
+    }
+
 
     function deleteBeer(id) {
         return new Promise(function (resolve, reject) {
@@ -280,6 +330,10 @@ module.exports = (function () {
         });
     }
 
+    function getCaseInsensitive(term) {
+        return new RegExp(term, "i");
+    }
+
     function isConnected() {
         return connected;
     }
@@ -288,15 +342,15 @@ module.exports = (function () {
     that.connect = connect;
     that.getAllSquads = getAllSquads;
     that.deleteBeer = deleteBeer;
-    that.addTagToBeer = addTagToBeer;
-    that.getBeerByManufacturer = getBeerByManufacturer;
     that.getSquadByName = getSquadByName;
     that.getPlayerByName = getPlayerByName;
+    that.getPlayerById = getPlayerById;
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
     that.getLastPointsByPlayerName = getLastPointsByPlayerName;
     that.getLastPointsByPlayerID = getLastPointsByPlayerID;
+    that.getSquadById = getSquadById;
     that.updateSquad = updateSquad;
     return that;
 })();
