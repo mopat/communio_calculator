@@ -271,7 +271,7 @@ module.exports = (function () {
                             })(currentSquad);//passing in variable to var here
 
                             function callback(error, res, done) {
-                                console.log(currentSquad.name)
+                                console.log(currentSquad.name);
                                 if (error) {
                                     console.log(error);
                                 } else {
@@ -280,18 +280,13 @@ module.exports = (function () {
                                     //check if full squad points have changed
                                     database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
                                         var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
-                                        if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
-                                            allSquadPoints += 1;
-                                        }
-
-
-                                        console.log(lastMatchdaySquadpoints < allSquadPoints);
-                                        // allSquadPoints += 1;
+                                        //----test
+                                       /* if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
+                                            allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
+                                        }*/
+                                        //-----
                                         if (allSquadPoints != lastMatchdaySquadpoints) {
                                             console.log("Updating... " + currentSquad.name);
-                                            //iterate players
-                                            var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
-
                                             // loop through players
                                             $($('.rangliste').find('tr')).each(function (j, elem) {
                                                 var row = $(elem);
@@ -301,18 +296,23 @@ module.exports = (function () {
                                                 var comunio_id = $(row).find('div.compare').attr('data-basepid');
                                                 var position = $(row).find('td.left').last().text();
 
-                                                var allPoints = $(row).find('td.right').first().text();
+                                                var allPoints = parseInt($(row).find('td.right').first().text());
                                                 //  console.log(allPoints)
                                                 var value = $(row).find('td.right').last().text();
 
-                                                //not working for es
-                                                var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
+                                                var matchDayNum = parseInt($($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim());
 
+                                                //------ test
+                                              /*  matchDayNum += 1;
+                                                var addPoints = Math.floor((Math.random() * 10) + 1);
+                                                allPoints += addPoints;
+*/
+                                                //---------
                                                 var matchdayDetails = {
                                                     position: position,
                                                     points: 0,
                                                     all_points: allPoints,
-                                                    matchday_num: parseInt(matchDayNum),
+                                                    matchday_num: matchDayNum,
                                                     value: value,
                                                     squad: currentSquad.name
                                                 };
@@ -328,7 +328,7 @@ module.exports = (function () {
                                                 };
 
                                                 if (player.name != "") {
-                                                    currentSquad.last_points = last_points;
+                                                    currentSquad.last_points = allSquadPoints;
                                                     currentSquad.players.push(player);
                                                     // console.log(currentSquad.name)
                                                 }

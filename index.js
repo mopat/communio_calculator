@@ -24,7 +24,7 @@ app.get("/", function () {
 app.get("/update_squads", function (req, res) {
     crawl.updateSquads().then(function (squads) {
         if (squads.length == 0) {
-            res.end('No beer in database');
+            res.end('No squad updated');
         }
         else
             res.json(squads);

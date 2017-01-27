@@ -176,26 +176,14 @@ module.exports = (function () {
 
     // mongoose.set('debug', true);
     function updateSquad(squad) {
-        //var squad = new Squad(squadObj);
         return new Promise(function (resolve, reject) {
-            // console.log(squadObj)
-            //console.log(count)
-            //console.log(squad);
             var i = 0;
-
-
             updateNewPlayer();
             function updateNewPlayer() {
                 var updatePlayer = squad.players[i];
                 var numOfPlayers = squad.players.length;
                 (function (updatePlayer) { //start wrapper code
-                   // console.log(updatePlayer.name)
                     Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-
-                        //console.log(player)
-                        //  console.log(player)
-
-                        // console.log( updatePlayer.matchday_details.all_points)
                         var lastMatchdayDetailsNum =  player.players[0].matchday_details.length -1;
 
 
@@ -204,21 +192,18 @@ module.exports = (function () {
                         var thisMatchdayPoints = parseInt(updatePlayer.matchday_details.all_points);
                        // console.log(lastMatchdayPoints, thisMatchdayPoints)
                         // --- test
-                        var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
+                       /* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
                      //   console.log(oldMatchdayNum);
                         var newMatchdayNum = oldMatchdayNum + 1;
                         var addPoints = Math.floor((Math.random() * 10) + 1);
                         thisMatchdayPoints += addPoints;
 
                         updatePlayer.matchday_details.all_points = thisMatchdayPoints;
-                        updatePlayer.matchday_details.matchday_num = newMatchdayNum;
+                        updatePlayer.matchday_details.matchday_num = newMatchdayNum;*/
                         //---
 
                         var points = thisMatchdayPoints - lastMatchdayPoints;
                         updatePlayer.matchday_details.points = points;
-
-                        // console.log(updatePlayer.comunio_id)
-
 
                         Squad.findOneAndUpdate({"players.comunio_id": player.players[0].comunio_id}, {
                             $set: {
@@ -247,56 +232,9 @@ module.exports = (function () {
                     });
                 })(updatePlayer);
             }
-
-
         });
     }
 
-    function updatePlayer(updatePlayer) {
-        return new Promise(function (resolve, reject) {
-            //  console.log(updatePlayer);
-            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-                console.log(player)
-                //console.log(player)
-                //  console.log(player)
-                var newMatchdayNum = parseInt(updatePlayer.matchday_details.matchday_num);
-                newMatchdayNum += 1;
-                if (newMatchdayNum > 17) {
-                    var _id = player.players[0]._id;
-                    //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}}, {new: true, upsert: true})
-                    //db.comstats_16_17.findOneAndUpdate({"players.comunio_id" : "31362"}, {$set: {"players.$.last_points": 9}, $push:{"players.$.matchday_details.points": 15}}, {new: true, upsert: true})
-
-                    var lastMatchdayPoints = player.players[0].matchday_details[0].points;
-                    var thisMatchdayPoints = updatePlayer.matchday_details.points;
-                    var thisMatchdayPoints = parseInt(lastMatchdayPoints) + Math.floor((Math.random() * 10) + 1);
-                    var newPoints = thisMatchdayPoints - lastMatchdayPoints;
-                    console.log("H " + player.players[0].matchday_details[0].points, thisMatchdayPoints)
-                    if (newPoints != undefined) {
-                        Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
-                            $set: {
-                                "players.$.last_points": newPoints
-                            },
-                            $push: {"players.$.matchday_details": new Matchday(updatePlayer.matchday_details)}
-                        }, {
-                            safe: true,
-                            upsert: true,
-                            new: true
-                        }, function (err, player) {
-                            console.log("UND " + player);
-                            if (err) {
-                                reject(err);
-                            } else {
-                                resolve(player);
-                            }
-                        })
-                    }
-                }
-                else {
-                    resolve("HEAY");
-                }
-            });
-        });
-    }
 
     function getPlayerByName(name) {
         return new Promise(function (resolve, reject) {
@@ -361,7 +299,6 @@ module.exports = (function () {
     that.getPlayerByName = getPlayerByName;
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
-    that.updatePlayer = updatePlayer;
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
     that.getLastPointsByPlayerName = getLastPointsByPlayerName;
     that.getLastPointsByPlayerID = getLastPointsByPlayerID;
