@@ -248,6 +248,25 @@ module.exports = (function () {
         });
     }
 
+    function getPlayerByNameAutocomplete(name) {
+        name = getCaseInsensitive(name);
+        return new Promise(function (resolve, reject) {
+            Squad.count({"players.name": name}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players.name": name}, {'players.$.name': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            var data = {name: player.players[0].name, _id: player.players[0]._id};
+                            resolve(data);
+                        }
+                    });
+                }
+                else resolve([]);
+            });
+        });
+    }
+
     /**
      * @todo
      * @param squadName
@@ -344,6 +363,7 @@ module.exports = (function () {
     that.deleteBeer = deleteBeer;
     that.getSquadByName = getSquadByName;
     that.getPlayerByName = getPlayerByName;
+    that.getPlayerByNameAutocomplete = getPlayerByNameAutocomplete;
     that.getPlayerById = getPlayerById;
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
