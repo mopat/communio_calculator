@@ -164,7 +164,7 @@ module.exports = (function () {
 
                                         var matchdayDetails = {
                                             position: position,
-                                            points : 0,
+                                            points: 0,
                                             all_points: points,
                                             matchday_num: parseInt(matchDayNum),
                                             value: value,
@@ -253,6 +253,7 @@ module.exports = (function () {
                         //console.log(squads);
                         count = 0;
                         loadPlayers();
+                        var updatedSquads = [];
 
                         function loadPlayers() {
                             //iterate squads
@@ -275,77 +276,96 @@ module.exports = (function () {
                                     console.log(error);
                                 } else {
                                     var $ = cheerio.load(res.body);
-                                    database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
-                                        var $ = cheerio.load(res.body);
-                                        //console.log("POINTS " + points.last_points);
-                                        var newPoints = $('.rangliste').find('td.bold.right').first().text();
-                                        if (newPoints == points.last_points) {
-                                            console.log("GLEICH")
+
+                                    //check if full squad points have changed
+                                    database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
+                                        var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
+                                        if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
+                                            allSquadPoints += 1;
+                                        }
+
+
+                                        console.log(lastMatchdaySquadpoints < allSquadPoints);
+                                        // allSquadPoints += 1;
+                                        if (allSquadPoints != lastMatchdaySquadpoints) {
+                                            console.log("Updating... " + currentSquad.name);
+                                            //iterate players
+                                            var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
+
+                                            // loop through players
+                                            $($('.rangliste').find('tr')).each(function (j, elem) {
+                                                var row = $(elem);
+                                                var td = $(row).find('td.right');
+                                                var playerName = $(row).find('td.playerCompare').text().trim();
+                                                var url = $(row).find('td a.nowrap').attr('href');
+                                                var comunio_id = $(row).find('div.compare').attr('data-basepid');
+                                                var position = $(row).find('td.left').last().text();
+
+                                                var allPoints = $(row).find('td.right').first().text();
+                                                //  console.log(allPoints)
+                                                var value = $(row).find('td.right').last().text();
+
+                                                //not working for es
+                                                var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
+
+                                                var matchdayDetails = {
+                                                    position: position,
+                                                    points: 0,
+                                                    all_points: allPoints,
+                                                    matchday_num: parseInt(matchDayNum),
+                                                    value: value,
+                                                    squad: currentSquad.name
+                                                };
+
+                                                var player = {
+                                                    name: playerName,
+                                                    url: url,
+                                                    comunio_id: comunio_id,
+                                                    full_url: COMSTATS_URL + url,
+                                                    started_at: parseInt(matchDayNum),
+                                                    last_points: 0,
+                                                    matchday_details: matchdayDetails
+                                                };
+
+                                                if (player.name != "") {
+                                                    currentSquad.last_points = last_points;
+                                                    currentSquad.players.push(player);
+                                                    // console.log(currentSquad.name)
+                                                }
+                                            });
+                                            database.updateSquad(currentSquad).then(function () {
+                                                updatedSquads.push(currentSquad);
+                                                if (count < squads.length - 1) {
+                                                    count++;
+                                                    loadPlayers();
+                                                }
+                                                else {
+                                                    if (error) {
+                                                        reject(error);
+                                                    } else {
+                                                        resolve(updatedSquads);
+                                                    }
+                                                    done();
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            if (count < squads.length - 1) {
+                                                count++;
+                                                loadPlayers();
+                                            }
+                                            else {
+                                                if (error) {
+                                                    reject(error);
+                                                } else {
+                                                    resolve(updatedSquads);
+                                                }
+                                                done();
+                                            }
                                         }
                                         //Überprüfen pb points gleich
                                     });
-                                    //iterate players
-                                    var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
 
-                                    // loop through players
-                                    $($('.rangliste').find('tr')).each(function (j, elem) {
-                                        var row = $(elem);
-                                        var td = $(row).find('td.right');
-                                        var playerName = $(row).find('td.playerCompare').text().trim();
-                                        var url = $(row).find('td a.nowrap').attr('href');
-                                        var comunio_id = $(row).find('div.compare').attr('data-basepid');
-                                        var position = $(row).find('td.left').last().text();
-
-                                        var allPoints = $(row).find('td.right').first().text();
-                                      //  console.log(allPoints)
-                                        var value = $(row).find('td.right').last().text();
-
-                                        //not working for es
-                                        var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
-
-                                        var matchdayDetails = {
-                                            position: position,
-                                            points: 0,
-                                            all_points: allPoints,
-                                            matchday_num: parseInt(matchDayNum),
-                                            value: value,
-                                            squad: currentSquad.name
-                                        };
-
-                                        var player = {
-                                            name: playerName,
-                                            url: url,
-                                            comunio_id: comunio_id,
-                                            full_url: COMSTATS_URL + url,
-                                            started_at: parseInt(matchDayNum),
-                                            last_points: 0,
-                                            matchday_details: matchdayDetails
-                                        };
-
-                                        if (player.name != "") {
-                                            currentSquad.last_points = last_points;
-                                            currentSquad.players.push(player);
-                                            // console.log(currentSquad.name)
-                                        }
-                                    });
-                                    database.updateSquad(currentSquad).then(function () {
-                                        console.log(count)
-                                        if (count < squads.length - 1) {
-                                            count++;
-                                            loadPlayers();
-                                        }
-                                        else {
-                                            if (error) {
-                                                reject(error);
-                                            } else {
-                                                resolve("COMPLETE");
-                                            }
-                                            done();
-                                        }
-                                    });
-
-
-                                    //  console.log(currentSquad);
                                 }
 
                             }

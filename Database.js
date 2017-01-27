@@ -169,8 +169,7 @@ module.exports = (function () {
         //  console.log(squadName)
         return new Promise(function (resolve, reject) {
             Squad.find({name: squadName}, {_id: 0, last_points: 1}, function (err, points) {
-                console.log("POINTS " + points);
-                resolve(points);
+                resolve(points[0].last_points);
             });
         });
     }
@@ -187,11 +186,10 @@ module.exports = (function () {
 
             updateNewPlayer();
             function updateNewPlayer() {
-                console.log(i)
                 var updatePlayer = squad.players[i];
                 var numOfPlayers = squad.players.length;
                 (function (updatePlayer) { //start wrapper code
-                    console.log(updatePlayer.name)
+                   // console.log(updatePlayer.name)
                     Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
 
                         //console.log(player)
@@ -199,13 +197,15 @@ module.exports = (function () {
 
                         // console.log( updatePlayer.matchday_details.all_points)
                         var lastMatchdayDetailsNum =  player.players[0].matchday_details.length -1;
+
+
                         var lastMatchdayPoints = player.players[0].matchday_details[lastMatchdayDetailsNum].all_points;
 
                         var thisMatchdayPoints = parseInt(updatePlayer.matchday_details.all_points);
-
+                       // console.log(lastMatchdayPoints, thisMatchdayPoints)
                         // --- test
                         var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
-                        console.log(oldMatchdayNum);
+                     //   console.log(oldMatchdayNum);
                         var newMatchdayNum = oldMatchdayNum + 1;
                         var addPoints = Math.floor((Math.random() * 10) + 1);
                         thisMatchdayPoints += addPoints;
