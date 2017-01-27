@@ -25,8 +25,8 @@ module.exports = (function () {
             matchday_num: Number,
             value: String,
             squad: String,
-            created_at: Date,
-            modified_at: Date
+            created_at: { type: Date, default: Date.now },
+            updated_at: { type: Date, default: Date.now }
         });
 
         var playerSchema = mongoose.Schema({
@@ -37,8 +37,8 @@ module.exports = (function () {
             started_at: Number,
             last_points: Number,
             matchday_details: [matchday_details],
-            created_at: Date,
-            modified_at: Date
+            created_at: { type: Date, default: Date.now },
+            updated_at: { type: Date, default: Date.now }
         });
 
         var squadSchema = mongoose.Schema({
@@ -49,8 +49,8 @@ module.exports = (function () {
             season: String,
             last_points: Number,
             players: [playerSchema],
-            created_at: Date,
-            modified_at: Date
+            created_at: { type: Date, default: Date.now },
+            updated_at: { type: Date, default: Date.now }
         });
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
@@ -78,18 +78,14 @@ module.exports = (function () {
     }
 
     function insertSquad(squadObj) {
-        // console.log(squadObj)
         var squad = new Squad(squadObj);
-        console.log(squadObj.name)
         return new Promise(function (resolve, reject) {
             Squad.count({name: squadObj.name}, function (err, count) {
-                //console.log(count)
-                //console.log(squad);
                 if (count == 0) {
                     squad.save(function (err, squad) {
                         // console.log(squad);
                         if (err) {
-                            console.log(err)
+                            console.log(err);
                             reject(err);
 
                         }
@@ -185,12 +181,9 @@ module.exports = (function () {
                 (function (updatePlayer) { //start wrapper code
                     Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
                         var lastMatchdayDetailsNum =  player.players[0].matchday_details.length -1;
-
-
                         var lastMatchdayPoints = player.players[0].matchday_details[lastMatchdayDetailsNum].all_points;
-
                         var thisMatchdayPoints = parseInt(updatePlayer.matchday_details.all_points);
-                       // console.log(lastMatchdayPoints, thisMatchdayPoints)
+
                         // --- test
                        /* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
                      //   console.log(oldMatchdayNum);
@@ -207,7 +200,9 @@ module.exports = (function () {
 
                         Squad.findOneAndUpdate({"players.comunio_id": player.players[0].comunio_id}, {
                             $set: {
-                                "players.$.last_points": points
+                                "players.$.last_points": points,
+                                "players.$.updated_at": Date.now(),
+                                updated_at: Date.now()
                             },
                             $push: {"players.$.matchday_details": new Matchday(updatePlayer.matchday_details)}
                         }, {

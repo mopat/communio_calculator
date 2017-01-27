@@ -281,7 +281,7 @@ module.exports = (function () {
                                     database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
                                         var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
                                         //----test
-                                       /* if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
+                                     /*   if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
                                             allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
                                         }*/
                                         //-----
@@ -303,11 +303,12 @@ module.exports = (function () {
                                                 var matchDayNum = parseInt($($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim());
 
                                                 //------ test
-                                              /*  matchDayNum += 1;
+                                           /*    matchDayNum += 1;
                                                 var addPoints = Math.floor((Math.random() * 10) + 1);
-                                                allPoints += addPoints;
-*/
+                                                allPoints += addPoints;*/
                                                 //---------
+
+
                                                 var matchdayDetails = {
                                                     position: position,
                                                     points: 0,
@@ -330,7 +331,6 @@ module.exports = (function () {
                                                 if (player.name != "") {
                                                     currentSquad.last_points = allSquadPoints;
                                                     currentSquad.players.push(player);
-                                                    // console.log(currentSquad.name)
                                                 }
                                             });
                                             database.updateSquad(currentSquad).then(function () {
