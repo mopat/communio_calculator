@@ -197,7 +197,7 @@ module.exports = (function () {
                                         if (error) {
                                             reject(error);
                                         } else {
-                                            resolve(builtSquads);
+                                            resolve(database.getAllSquads());
                                         }
                                         done();
                                     }
@@ -275,8 +275,19 @@ module.exports = (function () {
                                     console.log(error);
                                 } else {
                                     var $ = cheerio.load(res.body);
+                                    database.getSquadLastWeekPoints(currentSquad.name).then(function (points) {
+                                        var $ = cheerio.load(res.body);
+                                        //console.log("POINTS " + points.last_points);
+                                        var newPoints = $('.rangliste').find('td.bold.right').first().text();
+                                        if (newPoints == points.last_points) {
+                                            console.log("GLEICH")
+                                        }
+                                        //Überprüfen pb points gleich
+                                    });
                                     //iterate players
                                     var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
+
+                                    // loop through players
                                     $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
@@ -285,7 +296,8 @@ module.exports = (function () {
                                         var comunio_id = $(row).find('div.compare').attr('data-basepid');
                                         var position = $(row).find('td.left').last().text();
 
-                                        var points = $(row).find('td.right').first().text();
+                                        var allPoints = $(row).find('td.right').first().text();
+                                      //  console.log(allPoints)
                                         var value = $(row).find('td.right').last().text();
 
                                         //not working for es
@@ -294,7 +306,7 @@ module.exports = (function () {
                                         var matchdayDetails = {
                                             position: position,
                                             points: 0,
-                                            all_points: points,
+                                            all_points: allPoints,
                                             matchday_num: parseInt(matchDayNum),
                                             value: value,
                                             squad: currentSquad.name
