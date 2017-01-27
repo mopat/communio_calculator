@@ -166,7 +166,7 @@ module.exports = (function () {
 
 
     // GET PLAYERS ---------------------
-        mongoose.set('debug', true);
+       // mongoose.set('debug', true);
     function getPlayerByName(name) {
         name = getCaseInsensitive(name);
         return new Promise(function (resolve, reject) {

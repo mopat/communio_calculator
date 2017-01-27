@@ -305,7 +305,8 @@ module.exports = (function () {
                                                 //------ test
                                            /*    matchDayNum += 1;
                                                 var addPoints = Math.floor((Math.random() * 10) + 1);
-                                                allPoints += addPoints;*/
+                                                allPoints += addPoints;
+                                                */
                                                 //---------
 
 
