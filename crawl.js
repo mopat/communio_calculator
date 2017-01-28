@@ -285,6 +285,7 @@ module.exports = (function () {
                                             allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
                                         }*/
                                         //-----
+                                        console.log(allSquadPoints,lastMatchdaySquadpoints)
                                         if (allSquadPoints != lastMatchdaySquadpoints) {
                                             console.log("Updating... " + currentSquad.name);
                                             // loop through players
