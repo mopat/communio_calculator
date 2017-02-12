@@ -168,5 +168,8 @@ app.get("/points/squads/:id", function (req, res) {
 
 
 app.listen(8000, function () {
+    crawl.crawlNewResults().then(function (response) {
+        console.log(response)
+    });
     console.log('Listening To Port 8000');
 });

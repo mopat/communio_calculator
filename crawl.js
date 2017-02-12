@@ -3,6 +3,7 @@
  */
 var Crawler = require("crawler");
 var cheerio = require('cheerio');
+var request = require('request');
 var url = require('url');
 
 var config = require("./Config.json");
@@ -40,6 +41,23 @@ module.exports = (function () {
             }
         });
     }
+
+
+    function crawlNewResults() {
+        return new Promise(function (resolve, reject) {
+            request({
+                method: 'GET',
+                url: 'http://localhost/communio_calculator/results.html'
+            }, function (err, response, body) {
+                if (err) return console.error(err);
+
+                // Tell Cherrio to load the HTML
+                $ = cheerio.load(body);
+                resolve($('.clubname').text());
+            });
+        });
+    }
+
 
     function listSquads() {
         return new Promise(function (resolve, reject) {
@@ -281,11 +299,11 @@ module.exports = (function () {
                                     database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
                                         var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
                                         //----test
-                                     /*   if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
-                                            allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
-                                        }*/
+                                        /*   if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
+                                         allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
+                                         }*/
                                         //-----
-                                        console.log(allSquadPoints,lastMatchdaySquadpoints)
+                                        console.log(allSquadPoints, lastMatchdaySquadpoints)
                                         if (allSquadPoints != lastMatchdaySquadpoints) {
                                             console.log("Updating... " + currentSquad.name);
                                             // loop through players
@@ -304,10 +322,10 @@ module.exports = (function () {
                                                 var matchDayNum = parseInt($($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim());
 
                                                 //------ test
-                                           /*    matchDayNum += 1;
-                                                var addPoints = Math.floor((Math.random() * 10) + 1);
-                                                allPoints += addPoints;
-                                                */
+                                                /*    matchDayNum += 1;
+                                                 var addPoints = Math.floor((Math.random() * 10) + 1);
+                                                 allPoints += addPoints;
+                                                 */
                                                 //---------
 
 
@@ -396,5 +414,6 @@ module.exports = (function () {
     that.listSquads = listSquads;
     that.initSquads = initSquads;
     that.updateSquads = updateSquads;
+    that.crawlNewResults = crawlNewResults;
     return that;
 })();

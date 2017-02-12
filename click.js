@@ -7,11 +7,15 @@ page.onConsoleMessage = function(msg, lineNum, sourceId) {
     console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
 };
 page.onLoadFinished = function () {
+
     console.log("page load finished");
 
-    // page.render('export.png');
     page.render('results.png');
-    fs.write('results.html', page.content, 'a');
+    fs.write('results.html', page.content, 'w');
+
+
+
+
 };
 
 page.open(url, function (status) {
@@ -21,9 +25,9 @@ page.open(url, function (status) {
             if (showResults[i] != undefined)
                 showResults[i].click();
         }
+        //page.render('results.png');
 
     }, function (result) {
-
 
     });
 });
