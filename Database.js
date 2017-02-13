@@ -19,14 +19,14 @@ module.exports = (function () {
 
         // Model our Schema
         /*     var matchday_details = mongoose.Schema({
-            position: String,
-            points: Number,
-            all_points: Number,
-            matchday_num: Number,
-            value: String,
-            squad: String,
-            created_at: {type: Date, default: Date.now},
-            updated_at: {type: Date, default: Date.now}
+         position: String,
+         points: Number,
+         all_points: Number,
+         matchday_num: Number,
+         value: String,
+         squad: String,
+         created_at: {type: Date, default: Date.now},
+         updated_at: {type: Date, default: Date.now}
          });*/
 
         var playerSchema = mongoose.Schema({
@@ -104,27 +104,39 @@ module.exports = (function () {
 
     function updatePlayer(updatePlayer) {
         var points = updatePlayer.points;
-        console.log(updatePlayer.name)
         return new Promise(function (resolve, reject) {
-            Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
-                $set: {
-                    updated_at_matchday: updatePlayer.updated_at_matchday,
-                    "players.$.last_points": points,
-                    "players.$.updated_at": Date.now(),
-                    "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
-                },
-                $push: {"players.$.points": points}
-            }, {
-                safe: true,
-                upsert: true,
-                new: true
-            }, function (err, updatedPlayer) {
-                //console.log(updatedPlayer.players[0].name)
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    resolve(updatedPlayer);
+            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
+                var lastUpdated = player.players[0].updated_at_matchday;
+                var allPoints = player.players[0].all_points;
+                console.log(lastUpdated, updatePlayer.updated_at_matchday)
+                if (updatePlayer.updated_at_matchday > lastUpdated) {
+                    if (isNaN(parseInt(points))) {
+                        points = "0";
+                    }
+                    var newPoints = parseInt(allPoints) + parseInt(points);
+                    console.log(newPoints);
+                    Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
+                        $set: {
+                            updated_at_matchday: updatePlayer.updated_at_matchday,
+                            "players.$.last_points": updatePlayer.points,
+                            "players.$.all_points": newPoints,
+                            "players.$.updated_at": Date.now(),
+                            "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
+                        },
+                        $push: {"players.$.points": updatePlayer.points}
+                    }, {
+                        safe: true,
+                        upsert: true,
+                        new: true
+                    }, function (err, updatedPlayer) {
+                        //console.log(updatedPlayer.players[0].name)
+                        if (err) {
+                            console.log(err)
+                        }
+                        else {
+                            resolve(updatedPlayer);
+                        }
+                    });
                 }
             });
         });

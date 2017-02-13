@@ -68,12 +68,12 @@ module.exports = (function () {
 
                                 var points = $($(this).find('td.right')).text();
 
-                                console.log(playerName, points)
+                                // console.log(playerName, points)
                                 var updatePlayer = {
                                     name: playerName,
                                     comunio_id: comunioId,
                                     points: points,
-                                    updated_at_matchday: matchdayNum + 1
+                                    updated_at_matchday: matchdayNum
                                 };
                                 if (updatePlayer.comunio_id != undefined) {
                                     database.updatePlayer(updatePlayer);
@@ -228,9 +228,9 @@ module.exports = (function () {
                                             full_url: COMSTATS_URL + url,
                                             updated_at_matchday: parseInt(matchDayNum),
                                             started_at: parseInt(matchDayNum),
-                                            last_points: 0,
+                                            last_points: "null",
                                             all_points: points,
-                                            points: []
+                                            points: ["null"]
                                         };
 
                                         if (player.name != "") {
