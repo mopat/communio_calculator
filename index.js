@@ -10,6 +10,9 @@ var database = require("./Database.js");
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
+app.get('/matchday_results', function (req, res) {
+    res.sendFile('results.html', {root: __dirname});
+});
 /*
  DEFAULT URL WITH PORT 8000: localhost:8000/beer
  */

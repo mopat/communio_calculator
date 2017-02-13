@@ -9,7 +9,7 @@ var url = require('url');
 var config = require("./Config.json");
 var database = require("./Database.js");
 
-
+var matchdayResultsHtml = 'http://localhost:8000/matchday_results';
 var COMSTATS_URL = 'http://www.comstats.de';
 var COMSTATS_SQUAD_URL = 'http://www.comstats.de/squad';
 
@@ -73,7 +73,7 @@ module.exports = (function () {
                                     name: playerName,
                                     comunio_id: comunioId,
                                     points: points,
-                                    updated_at_matchday: matchdayNum
+                                    updated_at_matchday: matchdayNum + 1
                                 };
                                 if (updatePlayer.comunio_id != undefined) {
                                     resolve(database.updatePlayer(updatePlayer));
