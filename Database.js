@@ -99,7 +99,30 @@ module.exports = (function () {
         });
     }
 
-
+    function updatePlayer(updatePlayer) {
+        var points = updatePlayer.points;
+        console.log(updatePlayer.name)
+        return new Promise(function (resolve, reject) {
+            Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
+                $set: {
+                    "players.$.last_points": 55,
+                    "players.$.updated_at": Date.now()
+                }
+            }, {
+                safe: true,
+                upsert: true,
+                new: true
+            }, function (err, updatedPlayer) {
+                //console.log(updatedPlayer.players[0].name)
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                    resolve(updatedPlayer);
+                }
+            });
+        });
+    }
 
 
     // mongoose.set('debug', true);
@@ -163,10 +186,8 @@ module.exports = (function () {
     }
 
 
-
-
     // GET PLAYERS ---------------------
-       // mongoose.set('debug', true);
+    // mongoose.set('debug', true);
     function getPlayerByName(name) {
         name = getCaseInsensitive(name);
         return new Promise(function (resolve, reject) {
@@ -279,6 +300,7 @@ module.exports = (function () {
             });
         });
     }
+
     //---------------------------
 
 
@@ -372,5 +394,6 @@ module.exports = (function () {
     that.getLastPointsByPlayerID = getLastPointsByPlayerID;
     that.getSquadById = getSquadById;
     that.updateSquad = updateSquad;
+    that.updatePlayer = updatePlayer;
     return that;
 })();

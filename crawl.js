@@ -43,7 +43,7 @@ module.exports = (function () {
     }
 
 
-    function crawlNewResults() {
+    function updatePlayers() {
         return new Promise(function (resolve, reject) {
             request({
                 method: 'GET',
@@ -53,6 +53,35 @@ module.exports = (function () {
 
                 // Tell Cherrio to load the HTML
                 $ = cheerio.load(body);
+                $('.sptPaarDetails').each(function () {
+                    var $table = $($(this).find('table'));
+                    $table.each(function () {
+                        var $row = $($(this).find('tr'));
+                        $row.each(function () {
+                            var $data = $($(this).find('td'));
+                            var playerName = $(this).find('.playerName a').text().trim();
+                            if (playerName != undefined) {
+
+                                var comunioId = $($(this).find('.playerName')).attr('id');
+                                if (comunioId != undefined)
+                                    comunioId = comunioId.toString().replace('player', '');
+
+                                var points = parseInt($($(this).find('td.right')).text());
+                                if (isNaN(points)) points = 0;
+                                console.log(playerName, points)
+                                var updatePlayer = {
+                                    name: playerName,
+                                    comunio_id: comunioId,
+                                    points: points
+                                };
+                                if (updatePlayer.comunio_id != undefined)
+                                    database.updatePlayer(updatePlayer);
+                            }
+
+                        });
+
+                    });
+                });
                 resolve($('.clubname').text());
             });
         });
@@ -414,6 +443,6 @@ module.exports = (function () {
     that.listSquads = listSquads;
     that.initSquads = initSquads;
     that.updateSquads = updateSquads;
-    that.crawlNewResults = crawlNewResults;
+    that.updatePlayers = updatePlayers;
     return that;
 })();
