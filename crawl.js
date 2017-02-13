@@ -21,7 +21,7 @@ module.exports = (function () {
     database.connect().then(function () {
         console.log("Database connection success!");
     }).catch(function (err) {
-        console.log("There was an error!");
+        console.log("There was an error connecting to the database!");
         console.log(err);
     });
     function init() {
@@ -53,6 +53,7 @@ module.exports = (function () {
 
                 // Tell Cherrio to load the HTML
                 $ = cheerio.load(body);
+                var matchdayNum = parseInt($('title').html().split('.')[0]);
                 $('.sptPaarDetails').each(function () {
                     var $table = $($(this).find('table'));
                     $table.each(function () {
@@ -61,21 +62,23 @@ module.exports = (function () {
                             var $data = $($(this).find('td'));
                             var playerName = $(this).find('.playerName a').text().trim();
                             if (playerName != undefined) {
-
                                 var comunioId = $($(this).find('.playerName')).attr('id');
                                 if (comunioId != undefined)
                                     comunioId = comunioId.toString().replace('player', '');
 
-                                var points = parseInt($($(this).find('td.right')).text());
-                                if (isNaN(points)) points = 0;
+                                var points = $($(this).find('td.right')).text();
+
                                 console.log(playerName, points)
                                 var updatePlayer = {
                                     name: playerName,
                                     comunio_id: comunioId,
-                                    points: points
+                                    points: points,
+                                    updated_at_matchday: matchdayNum + 1
                                 };
-                                if (updatePlayer.comunio_id != undefined)
+                                if (updatePlayer.comunio_id != undefined) {
                                     database.updatePlayer(updatePlayer);
+                                }
+
                             }
 
                         });
@@ -162,7 +165,7 @@ module.exports = (function () {
                                     full_url: COMSTATS_URL + squadUrl,
                                     image_url: imageUrl,
                                     season: season,
-                                    last_points: 0,
+                                    last_points: "0",
                                     players: []
                                 };
                                 squads.push(squad);
@@ -209,23 +212,25 @@ module.exports = (function () {
                                         //not working for es
                                         var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
 
-                                        var matchdayDetails = {
-                                            position: position,
-                                            points: 0,
-                                            all_points: points,
-                                            matchday_num: parseInt(matchDayNum),
-                                            value: value,
-                                            squad: currentSquad.name
-                                        };
-
+                                        /*   var matchdayDetails = {
+                                         position: position,
+                                         points: 0,
+                                         all_points: points,
+                                         matchday_num: parseInt(matchDayNum),
+                                         value: value,
+                                         squad: currentSquad.name
+                                         };
+                                         */
                                         var player = {
                                             name: playerName,
                                             url: url,
                                             comunio_id: comunio_id,
                                             full_url: COMSTATS_URL + url,
+                                            updated_at_matchday: parseInt(matchDayNum),
                                             started_at: parseInt(matchDayNum),
                                             last_points: 0,
-                                            matchday_details: matchdayDetails
+                                            all_points: points,
+                                            points: []
                                         };
 
                                         if (player.name != "") {

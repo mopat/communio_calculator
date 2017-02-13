@@ -36,7 +36,17 @@ app.get("/init_squads", function (req, res) {
 });
 
 app.get("/update_squads", function (req, res) {
-    crawl.updateSquads().then(function (squads) {
+    crawl.updatePlayers().then(function (player) {
+        if (player.length == 0) {
+            res.end('No squad updated');
+        }
+        else
+            res.json(player);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+    /*    crawl.updateSquads().then(function (squads) {
         if (squads.length == 0) {
             res.end('No squad updated');
         }
@@ -45,7 +55,7 @@ app.get("/update_squads", function (req, res) {
     }).catch(function (err) {
         console.log(err);
         res.sendStatus(500);
-    });
+     });*/
 });
 
 //------------------------------------------
@@ -168,8 +178,5 @@ app.get("/points/squads/:id", function (req, res) {
 
 
 app.listen(8000, function () {
-    crawl.updatePlayers().then(function (response) {
-        console.log(response)
-    });
     console.log('Listening To Port 8000');
 });

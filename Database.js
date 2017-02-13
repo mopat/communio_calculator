@@ -18,7 +18,7 @@ module.exports = (function () {
         url = "mongodb://" + config.host + ":" + config.port + "/" + config.database;
 
         // Model our Schema
-        var matchday_details = mongoose.Schema({
+        /*     var matchday_details = mongoose.Schema({
             position: String,
             points: Number,
             all_points: Number,
@@ -27,7 +27,7 @@ module.exports = (function () {
             squad: String,
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now}
-        });
+         });*/
 
         var playerSchema = mongoose.Schema({
             name: String,
@@ -35,8 +35,10 @@ module.exports = (function () {
             full_url: String,
             comunio_id: String,
             started_at: Number,
-            last_points: Number,
-            matchday_details: [matchday_details],
+            updated_at_matchday: Number,
+            all_points: Number,
+            last_points: String,
+            points: [String],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now}
         });
@@ -50,11 +52,12 @@ module.exports = (function () {
             last_points: Number,
             players: [playerSchema],
             created_at: {type: Date, default: Date.now},
-            updated_at: {type: Date, default: Date.now}
+            updated_at: {type: Date, default: Date.now},
+            updated_at_matchday: Number
         });
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
-        Matchday = mongoose.model("Matchday", matchday_details);
+        // Matchday = mongoose.model("Matchday", matchday_details);
         //Player = mongoose.model("Player", squadSchema);
         Squad = mongoose.model("Squad", squadSchema);
     }
@@ -105,9 +108,12 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
             Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
                 $set: {
-                    "players.$.last_points": 55,
-                    "players.$.updated_at": Date.now()
-                }
+                    updated_at_matchday: updatePlayer.updated_at_matchday,
+                    "players.$.last_points": points,
+                    "players.$.updated_at": Date.now(),
+                    "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
+                },
+                $push: {"players.$.points": points}
             }, {
                 safe: true,
                 upsert: true,

@@ -7,15 +7,9 @@ page.onConsoleMessage = function(msg, lineNum, sourceId) {
     console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
 };
 page.onLoadFinished = function () {
-
     console.log("page load finished");
-
     page.render('results.png');
     fs.write('results.html', page.content, 'w');
-
-
-
-
 };
 
 page.open(url, function (status) {
