@@ -39,6 +39,7 @@ module.exports = (function () {
             all_points: Number,
             last_points: String,
             points: [String],
+            played_matchdays: [String],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now}
         });
@@ -108,13 +109,12 @@ module.exports = (function () {
             Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
                 var lastUpdated = player.players[0].updated_at_matchday;
                 var allPoints = player.players[0].all_points;
-                console.log(lastUpdated, updatePlayer.updated_at_matchday)
                 if (updatePlayer.updated_at_matchday > lastUpdated) {
                     if (isNaN(parseInt(points))) {
                         points = "0";
                     }
                     var newPoints = parseInt(allPoints) + parseInt(points);
-                    console.log(newPoints);
+                    //  console.log(newPoints);
                     Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
                         $set: {
                             updated_at_matchday: updatePlayer.updated_at_matchday,
@@ -123,7 +123,10 @@ module.exports = (function () {
                             "players.$.updated_at": Date.now(),
                             "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
                         },
-                        $push: {"players.$.points": updatePlayer.points}
+                        $push: {
+                            "players.$.points": updatePlayer.points,
+                            "players.$.played_matchdays": updatePlayer.updated_at_matchday
+                        }
                     }, {
                         safe: true,
                         upsert: true,
@@ -134,9 +137,12 @@ module.exports = (function () {
                             console.log(err)
                         }
                         else {
-                            resolve(updatedPlayer);
+                            resolve("Update Complete");
                         }
                     });
+                }
+                else {
+                    resolve('No Update Available');
                 }
             });
         });

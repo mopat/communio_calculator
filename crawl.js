@@ -76,7 +76,7 @@ module.exports = (function () {
                                     updated_at_matchday: matchdayNum
                                 };
                                 if (updatePlayer.comunio_id != undefined) {
-                                    database.updatePlayer(updatePlayer);
+                                    resolve(database.updatePlayer(updatePlayer));
                                 }
 
                             }
@@ -85,7 +85,11 @@ module.exports = (function () {
 
                     });
                 });
-                resolve($('.clubname').text());
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve($('.clubname').text().trim());
+                }
             });
         });
     }
@@ -228,9 +232,10 @@ module.exports = (function () {
                                             full_url: COMSTATS_URL + url,
                                             updated_at_matchday: parseInt(matchDayNum),
                                             started_at: parseInt(matchDayNum),
-                                            last_points: "null",
+                                            last_points: "init",
+                                            played_matchdays: [],
                                             all_points: points,
-                                            points: ["null"]
+                                            points: []
                                         };
 
                                         if (player.name != "") {
