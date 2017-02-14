@@ -153,8 +153,12 @@ app.get("/players", function (req, res, next) {
     })
 });
 
-app.get("/players", function (req, res) {
+app.get("/players", function (req, res, next) {
     var comunioID = req.query.comunio_id;
+    if (comunioID == undefined) {
+        next();
+        return;
+    }
     database.getPlayerByComunioID(comunioID).then(function (player) {
         if (player.length == 0) {
             res.end('Cannot find player with name: ' + comunioID);
@@ -165,8 +169,8 @@ app.get("/players", function (req, res) {
 });
 
 
-app.get("/players/autocomplete", function (req, res) {
-    var name = req.query.name;
+app.get("/players/autocomplete/:name", function (req, res) {
+    var name = req.params.name;
     database.getPlayerByNameAutocomplete(name).then(function (player) {
         if (player.length == 0) {
             res.end('Cannot find player with name: ' + name);

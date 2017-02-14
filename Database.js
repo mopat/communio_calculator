@@ -351,7 +351,11 @@ module.exports = (function () {
                         if (err) {
                             reject(err);
                         } else {
-                            var data = {name: player.players[0].name, _id: player.players[0]._id};
+                            var data = {
+                                name: player.players[0].name,
+                                _id: player.players[0]._id,
+                                comunio_id: player.players[0].comunio_id
+                            };
                             resolve(data);
                         }
                     });
