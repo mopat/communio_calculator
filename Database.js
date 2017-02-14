@@ -238,6 +238,23 @@ module.exports = (function () {
         });
     }
 
+    function getPlayerByComunioID(comunioID) {
+        return new Promise(function (resolve, reject) {
+            Squad.count({"players.comunio_id": comunioID}, function (err, count) {
+                if (count > 0) {
+                    Squad.findOne({"players.comunio_id": comunioID}, {'players.$': 1}, function (err, player) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player);
+                        }
+                    });
+                }
+                else resolve([]);
+            });
+        });
+    }
+
 // db.comstats_16_17.findOne({"comunio_id": "32508"}, {'players.$':1})
     function getPlayerById(id) {
         return new Promise(function (resolve, reject) {
@@ -441,6 +458,7 @@ module.exports = (function () {
     that.getPlayerByName = getPlayerByName;
     that.getPlayerByNameAutocomplete = getPlayerByNameAutocomplete;
     that.getPlayerById = getPlayerById;
+    that.getPlayerByComunioID = getPlayerByComunioID;
     that.isConnected = isConnected;
     that.insertSquad = insertSquad;
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
