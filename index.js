@@ -124,6 +124,18 @@ app.get("/squads/:id", function (req, res) {
     })
 });
 
+app.get("/squads/autocomplete/:name", function (req, res) {
+    var name = req.params.name;
+    database.getSquadByNameAutocomplete(name).then(function (player) {
+        if (player.length == 0) {
+            res.end('Cannot find player with name: ' + name);
+        }
+        else
+            res.json(player);
+    })
+});
+
+
 //-----------------------
 
 //PLAYER Endpoints-----------------------

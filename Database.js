@@ -347,16 +347,17 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
             Squad.count({"players.name": name}, function (err, count) {
                 if (count > 0) {
-                    Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                    Squad.find({"players.name": name}, {'players.$': 1}, function (err, players) {
                         if (err) {
                             reject(err);
                         } else {
-                            var data = {
-                                name: player.players[0].name,
-                                _id: player.players[0]._id,
-                                comunio_id: player.players[0].comunio_id
-                            };
-                            resolve(data);
+                            /*  var data = {
+                             name: players.players[0].name,
+                             _id: players.players[0]._id,
+                             comunio_id: players.players[0].comunio_id,
+                             full_url:  players.players[0].full_url,
+                             };*/
+                            resolve(players);
                         }
                     });
                 }
@@ -434,17 +435,27 @@ module.exports = (function () {
         });
     }
 
-
-    function deleteBeer(id) {
+    function getSquadByNameAutocomplete(name) {
+        name = getCaseInsensitive(name);
         return new Promise(function (resolve, reject) {
-            Beer.findByIdAndRemove(mongoose.Types.ObjectId(id), function (err, beer) {
-                if (err) {
-                    reject(err);
+            Squad.count({"name": name}, function (err, count) {
+                if (count > 0) {
+                    Squad.find({"name": name}, function (err, squads) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(squads);
+                            var data = {
+                                name: squads.name,
+                                _id: squads._id,
+                                full_url: squads.full_url
+                            };
+                            resolve(squads);
+                        }
+                    });
                 }
-                else {
-                    resolve(beer);
-                }
-            })
+                else resolve([]);
+            });
         });
     }
 
@@ -459,7 +470,7 @@ module.exports = (function () {
     that.init = init;
     that.connect = connect;
     that.getAllSquads = getAllSquads;
-    that.deleteBeer = deleteBeer;
+    that.getSquadByNameAutocomplete = getSquadByNameAutocomplete;
     that.getSquadByName = getSquadByName;
     that.getPlayerByName = getPlayerByName;
     that.getPlayerByNameAutocomplete = getPlayerByNameAutocomplete;
