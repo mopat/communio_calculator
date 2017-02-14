@@ -38,7 +38,7 @@ app.get("/init_squads", function (req, res) {
     });
 });
 
-app.get("/update_squads", function (req, res) {
+app.get("/update_players", function (req, res) {
     crawl.updatePlayers().then(function (player) {
         if (player.length == 0) {
             res.end('No squad updated');
@@ -49,7 +49,11 @@ app.get("/update_squads", function (req, res) {
         console.log(err);
         res.sendStatus(500);
     });
-    /*    crawl.updateSquads().then(function (squads) {
+});
+
+app.get("/update_squads", function (req, res) {
+
+    crawl.updateSquads().then(function (squads) {
         if (squads.length == 0) {
             res.end('No squad updated');
         }
@@ -58,16 +62,15 @@ app.get("/update_squads", function (req, res) {
     }).catch(function (err) {
         console.log(err);
         res.sendStatus(500);
-     });*/
+    });
 });
-
 //------------------------------------------
 
 // SQUAD Endpoints ------------------------
 
 app.get("/squads", function (req, res, next) {
     var name = req.query.name;
-    if (name == undefined){
+    if (name == undefined) {
         next();
         return;
     }

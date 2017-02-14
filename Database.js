@@ -39,6 +39,7 @@ module.exports = (function () {
             all_points: Number,
             last_points: String,
             points: [String],
+            value: Number,
             played_matchdays: [String],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now}
@@ -50,7 +51,7 @@ module.exports = (function () {
             full_url: String,
             image_url: String,
             season: String,
-            last_points: Number,
+            all_points: Number,
             players: [playerSchema],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now},
@@ -81,6 +82,32 @@ module.exports = (function () {
         });
     }
 
+    function updateSquad(updateSquadObj) {
+        return new Promise(function (resolve, reject) {
+            Squad.count({"name": updateSquadObj.name}, function (err, count) {
+                if (count != 0) {
+                    Squad.findOneAndUpdate({"name": updateSquadObj.name}, {
+                        $set: {
+                            all_points: parseInt(updateSquadObj.all_points),
+                            updated_a: Date.now()
+                        }
+                    }, {
+                        safe: true,
+                        upsert: true,
+                        new: true
+                    }, function (err, updatedPlayer) {
+                        if (err) {
+                            console.log(err)
+                        }
+                        else {
+                            resolve("Update Complete");
+                        }
+                    });
+                }
+                else resolve([]);
+            });
+        });
+    }
     function insertSquad(squadObj) {
         var squad = new Squad(squadObj);
         return new Promise(function (resolve, reject) {
@@ -157,7 +184,7 @@ module.exports = (function () {
     }
 
 
-    // mongoose.set('debug', true);
+    /*    // mongoose.set('debug', true);
     function updateSquad(squad) {
         return new Promise(function (resolve, reject) {
             var i = 0;
@@ -172,14 +199,14 @@ module.exports = (function () {
                         var thisMatchdayPoints = parseInt(updatePlayer.matchday_details.all_points);
 
                         // --- test
-                        /* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
+     /!* var oldMatchdayNum = parseInt(player.players[0].matchday_details[lastMatchdayDetailsNum].matchday_num);
                          //   console.log(oldMatchdayNum);
                          var newMatchdayNum = oldMatchdayNum + 1;
                          var addPoints = Math.floor((Math.random() * 10) + 1);
                          thisMatchdayPoints += addPoints;
 
                          updatePlayer.matchday_details.all_points = thisMatchdayPoints;
-                         updatePlayer.matchday_details.matchday_num = newMatchdayNum;*/
+     updatePlayer.matchday_details.matchday_num = newMatchdayNum;*!/
                         //---
 
                         var points = thisMatchdayPoints - lastMatchdayPoints;
@@ -215,7 +242,7 @@ module.exports = (function () {
                 })(updatePlayer);
             }
         });
-    }
+     }*/
 
 
     // GET PLAYERS ---------------------

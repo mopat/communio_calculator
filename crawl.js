@@ -201,7 +201,7 @@ module.exports = (function () {
                                 } else {
                                     var $ = cheerio.load(res.body);
                                     //iterate players
-                                    var last_points = parseInt($('.rangliste').find('td.bold.right').first().text());
+                                    var allPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
                                     $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
@@ -239,7 +239,7 @@ module.exports = (function () {
                                         };
 
                                         if (player.name != "") {
-                                            currentSquad.last_points = last_points;
+                                            currentSquad.all_points = allPoints;
                                             currentSquad.players.push(player);
                                             // console.log(currentSquad.name)
                                         }
@@ -301,7 +301,7 @@ module.exports = (function () {
                                     full_url: COMSTATS_URL + squadUrl,
                                     image_url: imageUrl,
                                     season: season,
-                                    last_points: 0,
+                                    last_points: "0",
                                     players: []
                                 };
                                 squads.push(squad);
@@ -309,10 +309,9 @@ module.exports = (function () {
                         });
                         //console.log(squads);
                         count = 0;
-                        loadPlayers();
-                        var updatedSquads = [];
+                        loadSquads();
 
-                        function loadPlayers() {
+                        function loadSquads() {
                             //iterate squads
                             var currentSquad = squads[count];
 
@@ -320,7 +319,7 @@ module.exports = (function () {
                                 c.queue([{
                                     uri: currentSquad.full_url,
                                     jQuery: false,
-                                    maxConnections: 50,
+                                    maxConnections: 20,
 
                                     // The global callback won't be called
                                     callback: callback
@@ -328,103 +327,39 @@ module.exports = (function () {
                             })(currentSquad);//passing in variable to var here
 
                             function callback(error, res, done) {
-                                console.log(currentSquad.name);
+                                console.log(currentSquad.name)
                                 if (error) {
                                     console.log(error);
                                 } else {
                                     var $ = cheerio.load(res.body);
+                                    //iterate players
+                                    var allPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
 
-                                    //check if full squad points have changed
-                                    database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
-                                        var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
-                                        //----test
-                                        /*   if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
-                                         allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
-                                         }*/
-                                        //-----
-                                        console.log(allSquadPoints, lastMatchdaySquadpoints)
-                                        if (allSquadPoints != lastMatchdaySquadpoints) {
-                                            console.log("Updating... " + currentSquad.name);
-                                            // loop through players
-                                            $($('.rangliste').find('tr')).each(function (j, elem) {
-                                                var row = $(elem);
-                                                var td = $(row).find('td.right');
-                                                var playerName = $(row).find('td.playerCompare').text().trim();
-                                                var url = $(row).find('td a.nowrap').attr('href');
-                                                var comunio_id = $(row).find('div.compare').attr('data-basepid');
-                                                var position = $(row).find('td.left').last().text();
+                                    var updateSquad = {
+                                        name: currentSquad.name,
+                                        all_points: 5
+                                    };
 
-                                                var allPoints = parseInt($(row).find('td.right').first().text());
-                                                //  console.log(allPoints)
-                                                var value = $(row).find('td.right').last().text();
+                                    if (updateSquad.name != "") {
+                                        currentSquad.all_points = allPoints;
+                                        // console.log(currentSquad.name)
+                                    }
 
-                                                var matchDayNum = parseInt($($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim());
-
-                                                //------ test
-                                                /*    matchDayNum += 1;
-                                                 var addPoints = Math.floor((Math.random() * 10) + 1);
-                                                 allPoints += addPoints;
-                                                 */
-                                                //---------
-
-
-                                                var matchdayDetails = {
-                                                    position: position,
-                                                    points: 0,
-                                                    all_points: allPoints,
-                                                    matchday_num: matchDayNum,
-                                                    value: value,
-                                                    squad: currentSquad.name
-                                                };
-
-                                                var player = {
-                                                    name: playerName,
-                                                    url: url,
-                                                    comunio_id: comunio_id,
-                                                    full_url: COMSTATS_URL + url,
-                                                    started_at: parseInt(matchDayNum),
-                                                    last_points: 0,
-                                                    matchday_details: matchdayDetails
-                                                };
-
-                                                if (player.name != "") {
-                                                    currentSquad.last_points = allSquadPoints;
-                                                    currentSquad.players.push(player);
-                                                }
-                                            });
-                                            database.updateSquad(currentSquad).then(function () {
-                                                updatedSquads.push(currentSquad);
-                                                if (count < squads.length - 1) {
-                                                    count++;
-                                                    loadPlayers();
-                                                }
-                                                else {
-                                                    if (error) {
-                                                        reject(error);
-                                                    } else {
-                                                        resolve(updatedSquads);
-                                                    }
-                                                    done();
-                                                }
-                                            });
+                                    database.updateSquad(currentSquad);
+                                    builtSquads.push(currentSquad);
+                                    if (count < squads.length - 1) {
+                                        count++;
+                                        loadSquads();
+                                    }
+                                    else {
+                                        if (error) {
+                                            reject(error);
+                                        } else {
+                                            resolve(database.getAllSquads());
                                         }
-                                        else {
-                                            if (count < squads.length - 1) {
-                                                count++;
-                                                loadPlayers();
-                                            }
-                                            else {
-                                                if (error) {
-                                                    reject(error);
-                                                } else {
-                                                    resolve(updatedSquads);
-                                                }
-                                                done();
-                                            }
-                                        }
-                                        //Überprüfen pb points gleich
-                                    });
-
+                                        done();
+                                    }
+                                    //  console.log(currentSquad);
                                 }
 
                             }
@@ -436,6 +371,174 @@ module.exports = (function () {
             ]);
         });
     }
+
+    /*
+     //for storing ion database
+     function updateSquads() {
+     var squads = [];
+     return new Promise(function (resolve, reject) {
+     var builtSquads = [];
+     c.queue([{
+     uri: COMSTATS_SQUAD_URL,
+     jQuery: false,
+     maxConnections: 20,
+     // The global callback won't be called
+     callback: function (error, res, done) {
+     if (error) {
+     console.log(error);
+     } else {
+     //   console.log('Grabbed', res.body, 'bytes');
+     var $ = cheerio.load(res.body);
+
+     $('.clubPics').each(function (i, elem) {
+     var el = $(elem);
+     $(el.find('a')).each(function () {
+     var squadUrl = $(this).attr('href');
+     var squadName = $(this).find('img').attr('title');
+     var imageUrl = $(this).find('img').attr('src');
+     var season = "16/17";
+     var squad = {
+     name: squadName,
+     url: squadUrl,
+     full_url: COMSTATS_URL + squadUrl,
+     image_url: imageUrl,
+     season: season,
+     last_points: 0,
+     players: []
+     };
+     squads.push(squad);
+     });
+     });
+     //console.log(squads);
+     count = 0;
+     loadPlayers();
+     var updatedSquads = [];
+
+     function loadPlayers() {
+     //iterate squads
+     var currentSquad = squads[count];
+
+     (function (currentSquad) { //start wrapper code
+     c.queue([{
+     uri: currentSquad.full_url,
+     jQuery: false,
+     maxConnections: 50,
+
+     // The global callback won't be called
+     callback: callback
+     }]);
+     })(currentSquad);//passing in variable to var here
+
+     function callback(error, res, done) {
+     console.log(currentSquad.name);
+     if (error) {
+     console.log(error);
+     } else {
+     var $ = cheerio.load(res.body);
+
+     //check if full squad points have changed
+     database.getSquadLastWeekPoints(currentSquad.name).then(function (lastMatchdaySquadpoints) {
+     var allSquadPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
+     //----test
+     /!*   if (currentSquad.name == "1. FC Köln" || currentSquad.name == "FC Augsburg") {
+     allSquadPoints += Math.floor((Math.random() * 10) + 1) * 10;
+     }*!/
+     //-----
+     console.log(allSquadPoints, lastMatchdaySquadpoints)
+     if (allSquadPoints != lastMatchdaySquadpoints) {
+     console.log("Updating... " + currentSquad.name);
+     // loop through players
+     $($('.rangliste').find('tr')).each(function (j, elem) {
+     var row = $(elem);
+     var td = $(row).find('td.right');
+     var playerName = $(row).find('td.playerCompare').text().trim();
+     var url = $(row).find('td a.nowrap').attr('href');
+     var comunio_id = $(row).find('div.compare').attr('data-basepid');
+     var position = $(row).find('td.left').last().text();
+
+     var allPoints = parseInt($(row).find('td.right').first().text());
+     //  console.log(allPoints)
+     var value = $(row).find('td.right').last().text();
+
+     var matchDayNum = parseInt($($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim());
+
+     //------ test
+     /!*    matchDayNum += 1;
+     var addPoints = Math.floor((Math.random() * 10) + 1);
+     allPoints += addPoints;
+     *!/
+     //---------
+
+
+     var matchdayDetails = {
+     position: position,
+     points: 0,
+     all_points: allPoints,
+     matchday_num: matchDayNum,
+     value: value,
+     squad: currentSquad.name
+     };
+
+     var player = {
+     name: playerName,
+     url: url,
+     comunio_id: comunio_id,
+     full_url: COMSTATS_URL + url,
+     started_at: parseInt(matchDayNum),
+     last_points: 0,
+     matchday_details: matchdayDetails
+     };
+
+     if (player.name != "") {
+     currentSquad.last_points = allSquadPoints;
+     currentSquad.players.push(player);
+     }
+     });
+     database.updateSquad(currentSquad).then(function () {
+     updatedSquads.push(currentSquad);
+     if (count < squads.length - 1) {
+     count++;
+     loadPlayers();
+     }
+     else {
+     if (error) {
+     reject(error);
+     } else {
+     resolve(updatedSquads);
+     }
+     done();
+     }
+     });
+     }
+     else {
+     if (count < squads.length - 1) {
+     count++;
+     loadPlayers();
+     }
+     else {
+     if (error) {
+     reject(error);
+     } else {
+     resolve(updatedSquads);
+     }
+     done();
+     }
+     }
+     //Überprüfen pb points gleich
+     });
+
+     }
+
+     }
+     }
+     }
+
+     }
+     }
+     ]);
+     });
+     }
+     */
 
 
 // Queue just one URL, with default callback
