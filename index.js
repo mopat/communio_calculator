@@ -64,6 +64,20 @@ app.get("/update_squads", function (req, res) {
         res.sendStatus(500);
     });
 });
+
+app.get("/update_player_infos", function (req, res) {
+
+    crawl.updaePlayerInfos().then(function (squads) {
+        if (squads.length == 0) {
+            res.end('No squad updated');
+        }
+        else
+            res.json(squads);
+    }).catch(function (err) {
+        console.log(err);
+        res.sendStatus(500);
+    });
+});
 //------------------------------------------
 
 // SQUAD Endpoints ------------------------

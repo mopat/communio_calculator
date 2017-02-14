@@ -234,6 +234,7 @@ module.exports = (function () {
                                             started_at: parseInt(matchDayNum),
                                             last_points: "init",
                                             value: playerValue,
+                                            position: position,
                                             played_matchdays: [],
                                             all_points: points,
                                             points: []
@@ -273,6 +274,118 @@ module.exports = (function () {
         });
     }
 
+    //for storing ion database
+    function updaePlayerInfos() {
+        var squads = [];
+        return new Promise(function (resolve, reject) {
+            var builtSquads = [];
+            c.queue([{
+                uri: COMSTATS_SQUAD_URL,
+                jQuery: false,
+                maxConnections: 20,
+                // The global callback won't be called
+                callback: function (error, res, done) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        //   console.log('Grabbed', res.body, 'bytes');
+                        var $ = cheerio.load(res.body);
+
+                        $('.clubPics').each(function (i, elem) {
+                            var el = $(elem);
+                            $(el.find('a')).each(function () {
+                                var squadUrl = $(this).attr('href');
+                                var squadName = $(this).find('img').attr('title');
+                                var imageUrl = $(this).find('img').attr('src');
+                                var season = "16/17";
+                                var squad = {
+                                    name: squadName,
+                                    url: squadUrl,
+                                    full_url: COMSTATS_URL + squadUrl,
+                                    image_url: imageUrl,
+                                    season: season,
+                                    value: 0,
+                                    players: []
+                                };
+                                squads.push(squad);
+                            });
+                        });
+                        //console.log(squads);
+                        count = 0;
+                        loadPlayers();
+
+                        function loadPlayers() {
+                            //iterate squads
+                            var currentSquad = squads[count];
+
+                            (function (currentSquad) { //start wrapper code
+                                c.queue([{
+                                    uri: currentSquad.full_url,
+                                    jQuery: false,
+                                    maxConnections: 20,
+
+                                    // The global callback won't be called
+                                    callback: callback
+                                }]);
+                            })(currentSquad);//passing in variable to var here
+
+                            function callback(error, res, done) {
+                                console.log(currentSquad.name)
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    var $ = cheerio.load(res.body);
+                                    //iterate players
+                                    var allPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
+                                    var value = parseInt($('.rangliste').find('td.bold.right').last().text().replace(/\./g, ''));
+                                    $($('.rangliste').find('tr')).each(function (j, elem) {
+                                        var row = $(elem);
+                                        var td = $(row).find('td.right');
+                                        var playerName = $(row).find('td.playerCompare').text().trim();
+                                        var url = $(row).find('td a.nowrap').attr('href');
+                                        var comunio_id = $(row).find('div.compare').attr('data-basepid');
+                                        var position = $(row).find('td.left').last().text();
+
+                                        var points = $(row).find('td.right').first().text();
+                                        var playerValue = parseInt($(row).find('td.right').last().text().replace(/\./g, ''));
+
+                                        //not working for es
+                                        var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
+
+                                        var updatePlayerInfos = {
+                                            comunio_id: comunio_id,
+                                            value: playerValue,
+                                            all_points: points,
+                                            position: position
+                                        };
+                                        database.updatePlayerInfos(updatePlayerInfos);
+                                    });
+
+                                    builtSquads.push(currentSquad);
+                                    if (count < squads.length - 1) {
+                                        count++;
+                                        loadPlayers();
+                                    }
+                                    else {
+                                        if (error) {
+                                            reject(error);
+                                        } else {
+                                            resolve(database.getAllSquads());
+                                        }
+                                        done();
+                                    }
+                                    //  console.log(currentSquad);
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+            }
+            ]);
+        });
+    }
     //for storing ion database
     function updateSquads() {
         var squads = [];
@@ -555,5 +668,6 @@ module.exports = (function () {
     that.initSquads = initSquads;
     that.updateSquads = updateSquads;
     that.updatePlayers = updatePlayers;
+    that.updaePlayerInfos = updaePlayerInfos;
     return that;
 })();

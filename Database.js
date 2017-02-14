@@ -36,6 +36,7 @@ module.exports = (function () {
             comunio_id: String,
             started_at: Number,
             updated_at_matchday: Number,
+            position: String,
             all_points: Number,
             points: [String],
             value: Number,
@@ -184,6 +185,39 @@ module.exports = (function () {
         });
     }
 
+    function updatePlayerInfos(updatePlayerInfos) {
+        return new Promise(function (resolve, reject) {
+            Squad.findOne({
+                "players.comunio_id": updatePlayerInfos.comunio_id
+            }, {'players.$': 1}, function (err, player) {
+                if (player != null) {
+                    Squad.findOneAndUpdate({"players.comunio_id": updatePlayerInfos.comunio_id}, {
+                        $set: {
+                            "players.$.value": updatePlayerInfos.value,
+                            "players.$.position": updatePlayerInfos.position
+                        }
+                    }, {
+                        safe: true,
+                        upsert: true,
+                        new: true
+                    }, function (err, updatedPlayer) {
+                        //console.log(updatedPlayer.players[0].name)
+                        if (err) {
+                            console.log(err)
+                            reject(err);
+                        }
+                        else {
+                            resolve("Update Complete");
+                        }
+                    });
+                }
+
+                else {
+                    resolve('No Update Available');
+                }
+            });
+        });
+    }
 
     /*    // mongoose.set('debug', true);
     function updateSquad(squad) {
@@ -496,5 +530,6 @@ module.exports = (function () {
     that.getSquadById = getSquadById;
     that.updateSquad = updateSquad;
     that.updatePlayer = updatePlayer;
+    that.updatePlayerInfos = updatePlayerInfos;
     return that;
 })();
