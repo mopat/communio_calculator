@@ -228,7 +228,7 @@ module.exports = (function () {
             Squad.count({"players.name": name}, function (err, count) {
                 console.log(count)
                 if (count > 0) {
-                    Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
+                    Squad.find({"players.name": name}, {'players.$': 1}, function (err, player) {
                         if (err) {
                             reject(err);
                         } else {
@@ -401,7 +401,7 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
             Squad.count({name: name}, function (err, count) {
                 if (count > 0) {
-                    Squad.findOne({name: name}, function (err, squad) {
+                    Squad.find({name: name}, function (err, squad) {
                         if (err) {
                             reject(err);
                         } else {
