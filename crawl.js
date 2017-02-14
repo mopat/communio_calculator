@@ -211,7 +211,7 @@ module.exports = (function () {
                                         var position = $(row).find('td.left').last().text();
 
                                         var points = $(row).find('td.right').first().text();
-                                        var playerValue = $(row).find('td.right').last().text();
+                                        var playerValue = parseInt($(row).find('td.right').last().text().replace(/\./g, ''));
 
                                         //not working for es
                                         var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
@@ -233,6 +233,7 @@ module.exports = (function () {
                                             updated_at_matchday: parseInt(matchDayNum),
                                             started_at: parseInt(matchDayNum),
                                             last_points: "init",
+                                            value: playerValue,
                                             played_matchdays: [],
                                             all_points: points,
                                             points: []
@@ -340,7 +341,6 @@ module.exports = (function () {
                                     if (currentSquad.name != "") {
                                         currentSquad.all_points = allPoints;
                                         currentSquad.value = value;
-                                        // console.log(currentSquad.name)
                                     }
 
                                     database.updateSquad(currentSquad);
