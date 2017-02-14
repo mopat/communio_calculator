@@ -3,6 +3,7 @@
  */
 var bodyParser = require("body-parser");
 var express = require("express");
+var cors = require('cors');
 var crawl = require('./crawl.js');
 var config = require("./Config.json");
 var database = require("./Database.js");
@@ -10,9 +11,18 @@ var database = require("./Database.js");
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
+app.use(cors());
+
+
+// ## CORS middleware
+//
+
+
 app.get('/matchday_results', function (req, res) {
     res.sendFile('results.html', {root: __dirname});
 });
+
+
 /*
  DEFAULT URL WITH PORT 8000: localhost:8000/beer
  */
