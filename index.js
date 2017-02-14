@@ -110,6 +110,8 @@ app.get("/squads/:id", function (req, res) {
 //-----------------------
 
 //PLAYER Endpoints-----------------------
+
+
 app.get("/players/:id", function (req, res) {
     var id = req.params.id;
     database.getPlayerById(id).then(function (player) {
@@ -146,11 +148,25 @@ app.get("/players/autocomplete", function (req, res) {
 
 //----------------
 
-app.get("/points/player", function (req, res) {
+app.get("/points/player", function (req, res, next) {
     var name = req.query.name;
+    if (name == undefined) {
+        next();
+        return;
+    }
     database.getLastPointsByPlayerName(name).then(function (points) {
         if (points.length == 0) {
             res.end('Cannot find player with name: ' + name);
+        }
+        else
+            res.json(points);
+    })
+});
+
+app.get("/points/player", function (req, res) {
+    database.getLastPointsByPlayerComunioID(comunioID).then(function (points) {
+        if (points.length == 0) {
+            res.end('Cannot find player with comunio_id: ' + comunioID);
         }
         else
             res.json(points);

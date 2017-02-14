@@ -9,7 +9,7 @@ var url = require('url');
 var config = require("./Config.json");
 var database = require("./Database.js");
 
-var matchdayResultsHtml = 'http://localhost:8000/matchday_results';
+var MATCHDAY_RESULTS = 'http://localhost:8000/matchday_results';
 var COMSTATS_URL = 'http://www.comstats.de';
 var COMSTATS_SQUAD_URL = 'http://www.comstats.de/squad';
 
@@ -47,7 +47,7 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
             request({
                 method: 'GET',
-                url: 'http://localhost/communio_calculator/results.html'
+                url: MATCHDAY_RESULTS
             }, function (err, response, body) {
                 if (err) return console.error(err);
 

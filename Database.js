@@ -105,6 +105,7 @@ module.exports = (function () {
 
     function updatePlayer(updatePlayer) {
         var points = updatePlayer.points;
+        console.log(updatePlayer.updated_at_matchday)
         return new Promise(function (resolve, reject) {
             //db.comstats_16_17.findOne({'played_matchdays': {$nin: [21]} ,"players.comunio_id": "32508"}, {'players.$':1})
             Squad.findOne({
@@ -282,6 +283,27 @@ module.exports = (function () {
         });
     }
 
+    function getLastPointsByPlayerComunioID(comunioID) {
+        return new Promise(function (resolve, reject) {
+            Squad.count({"players.comunio_id": comunioID}, function (err, count) {
+
+                if (count > 0) {
+                    Squad.findOne({"players.comunio_id": comunioID}, {'players.$': 1}, function (err, player) {
+
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(player.players[0].last_points);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
+                }
+            });
+        });
+    }
+
     function getLastPointsByPlayerID(id) {
         return new Promise(function (resolve, reject) {
             Squad.count({"players._id": id}, function (err, count) {
@@ -424,6 +446,7 @@ module.exports = (function () {
     that.getSquadLastWeekPoints = getSquadLastWeekPoints;
     that.getLastPointsByPlayerName = getLastPointsByPlayerName;
     that.getLastPointsByPlayerID = getLastPointsByPlayerID;
+    that.getLastPointsByPlayerComunioID = getLastPointsByPlayerComunioID;
     that.getSquadById = getSquadById;
     that.updateSquad = updateSquad;
     that.updatePlayer = updatePlayer;
