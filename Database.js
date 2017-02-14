@@ -37,7 +37,6 @@ module.exports = (function () {
             started_at: Number,
             updated_at_matchday: Number,
             all_points: Number,
-            last_points: String,
             points: [String],
             value: Number,
             played_matchdays: [String],
@@ -52,6 +51,7 @@ module.exports = (function () {
             image_url: String,
             season: String,
             all_points: Number,
+            value: Number,
             players: [playerSchema],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now},
@@ -89,7 +89,8 @@ module.exports = (function () {
                     Squad.findOneAndUpdate({"name": updateSquadObj.name}, {
                         $set: {
                             all_points: parseInt(updateSquadObj.all_points),
-                            updated_a: Date.now()
+                            updated_a: Date.now(),
+                            value: updateSquadObj.value
                         }
                     }, {
                         safe: true,

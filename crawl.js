@@ -138,7 +138,6 @@ module.exports = (function () {
         });
     }
 
-
     //for storing ion database
     function initSquads() {
         var squads = [];
@@ -169,7 +168,7 @@ module.exports = (function () {
                                     full_url: COMSTATS_URL + squadUrl,
                                     image_url: imageUrl,
                                     season: season,
-                                    last_points: "0",
+                                    value: 0,
                                     players: []
                                 };
                                 squads.push(squad);
@@ -202,6 +201,7 @@ module.exports = (function () {
                                     var $ = cheerio.load(res.body);
                                     //iterate players
                                     var allPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
+                                    var value = parseInt($('.rangliste').find('td.bold.right').last().text().replace(/\./g, ''));
                                     $($('.rangliste').find('tr')).each(function (j, elem) {
                                         var row = $(elem);
                                         var td = $(row).find('td.right');
@@ -211,7 +211,7 @@ module.exports = (function () {
                                         var position = $(row).find('td.left').last().text();
 
                                         var points = $(row).find('td.right').first().text();
-                                        var value = $(row).find('td.right').last().text();
+                                        var playerValue = $(row).find('td.right').last().text();
 
                                         //not working for es
                                         var matchDayNum = $($('.titlecontent').find('h2')[1]).html().split(" ")[0].replace(".", " ").trim();
@@ -240,6 +240,7 @@ module.exports = (function () {
 
                                         if (player.name != "") {
                                             currentSquad.all_points = allPoints;
+                                            currentSquad.value = value;
                                             currentSquad.players.push(player);
                                             // console.log(currentSquad.name)
                                         }
@@ -334,14 +335,11 @@ module.exports = (function () {
                                     var $ = cheerio.load(res.body);
                                     //iterate players
                                     var allPoints = parseInt($('.rangliste').find('td.bold.right').first().text());
+                                    var value = parseInt($('.rangliste').find('td.bold.right').last().text().replace(/\./g, ''));
 
-                                    var updateSquad = {
-                                        name: currentSquad.name,
-                                        all_points: 5
-                                    };
-
-                                    if (updateSquad.name != "") {
+                                    if (currentSquad.name != "") {
                                         currentSquad.all_points = allPoints;
+                                        currentSquad.value = value;
                                         // console.log(currentSquad.name)
                                     }
 
