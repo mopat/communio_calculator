@@ -73,7 +73,7 @@ module.exports = (function () {
                                     name: playerName,
                                     comunio_id: comunioId,
                                     points: points,
-                                    updated_at_matchday: matchdayNum + 1
+                                    updated_at_matchday: matchdayNum
                                 };
                                 if (updatePlayer.comunio_id != undefined) {
                                     resolve(database.updatePlayer(updatePlayer));

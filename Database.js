@@ -106,10 +106,16 @@ module.exports = (function () {
     function updatePlayer(updatePlayer) {
         var points = updatePlayer.points;
         return new Promise(function (resolve, reject) {
-            Squad.findOne({"players.comunio_id": updatePlayer.comunio_id}, {'players.$': 1}, function (err, player) {
-                var lastUpdated = player.players[0].updated_at_matchday;
-                var allPoints = player.players[0].all_points;
-                if (updatePlayer.updated_at_matchday > lastUpdated) {
+            //db.comstats_16_17.findOne({'played_matchdays': {$nin: [21]} ,"players.comunio_id": "32508"}, {'players.$':1})
+            Squad.findOne({
+                'players.played_matchdays': {$nin: [updatePlayer.updated_at_matchday]},
+                "players.comunio_id": updatePlayer.comunio_id
+            }, {'players.$': 1}, function (err, player) {
+                if (player != null) {
+
+
+                    var allPoints = player.players[0].all_points;
+                    //  if (updatePlayer.updated_at_matchday > lastUpdated) {
                     if (isNaN(parseInt(points))) {
                         points = "0";
                     }
@@ -141,6 +147,7 @@ module.exports = (function () {
                         }
                     });
                 }
+
                 else {
                     resolve('No Update Available');
                 }
@@ -230,6 +237,7 @@ module.exports = (function () {
         });
     }
 
+// db.comstats_16_17.findOne({"comunio_id": "32508"}, {'players.$':1})
     function getPlayerById(id) {
         return new Promise(function (resolve, reject) {
             Squad.count({"players._id": id}, function (err, count) {
