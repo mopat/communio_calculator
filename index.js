@@ -195,7 +195,13 @@ app.get("/points/player", function (req, res, next) {
 });
 
 app.get("/points/player", function (req, res) {
+    var comunioID = req.query.comunio_id;
+    if (comunioID == undefined) {
+        next();
+        return;
+    }
     database.getLastPointsByPlayerComunioID(comunioID).then(function (points) {
+
         if (points.length == 0) {
             res.end('Cannot find player with comunio_id: ' + comunioID);
         }

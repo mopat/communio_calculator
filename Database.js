@@ -37,6 +37,7 @@ module.exports = (function () {
             started_at: Number,
             updated_at_matchday: Number,
             position: String,
+            last_points: String,
             all_points: Number,
             points: [String],
             value: Number,
@@ -225,6 +226,7 @@ module.exports = (function () {
         name = getCaseInsensitive(name);
         return new Promise(function (resolve, reject) {
             Squad.count({"players.name": name}, function (err, count) {
+                console.log(count)
                 if (count > 0) {
                     Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
                         if (err) {
@@ -304,7 +306,6 @@ module.exports = (function () {
     function getLastPointsByPlayerComunioID(comunioID) {
         return new Promise(function (resolve, reject) {
             Squad.count({"players.comunio_id": comunioID}, function (err, count) {
-
                 if (count > 0) {
                     Squad.findOne({"players.comunio_id": comunioID}, {'players.$': 1}, function (err, player) {
 
@@ -346,7 +347,7 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
             Squad.count({"players.name": name}, function (err, count) {
                 if (count > 0) {
-                    Squad.findOne({"players.name": name}, {'players.$.name': 1}, function (err, player) {
+                    Squad.findOne({"players.name": name}, {'players.$': 1}, function (err, player) {
                         if (err) {
                             reject(err);
                         } else {
