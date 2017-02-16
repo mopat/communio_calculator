@@ -1,6 +1,7 @@
 /**
  * Created by morcz on 21.01.2017.
  */
+//lt -s comstatsapi -p 8000
 var bodyParser = require("body-parser");
 var express = require("express");
 var cors = require('cors');
