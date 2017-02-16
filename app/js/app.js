@@ -2,6 +2,7 @@
  * Created by Patrick on 14.02.2017.
  */
 var API_URL = 'http://localhost:8000/';
+//var API_URL = 'http://comstatsapi.localtunnel.me/';
 $(document).ready(function () {
     init();
     getMyPlayers();
