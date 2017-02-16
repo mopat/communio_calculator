@@ -7,6 +7,9 @@ var cors = require('cors');
 var crawl = require('./crawl.js');
 var config = require("./Config.json");
 var database = require("./Database.js");
+var path = require('path');
+var childProcess = require('child_process');
+var phantomjs = require('phantomjs');
 
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
@@ -16,6 +19,19 @@ app.use(cors());
 
 // ## CORS middleware
 //
+var binPath = phantomjs.path
+
+function updateMatchday() {
+    var childArgs = [
+        path.join(__dirname, 'matchday-phantom.js'),
+        'some other argument (passed to phantomjs script)'
+    ];
+
+    childProcess.execFile(binPath, childArgs, function (err, stdout, stderr) {
+        // handle results
+        console.log(err);
+    });
+}
 
 
 app.get('/matchday_results/:matchdayNum', function (req, res) {
