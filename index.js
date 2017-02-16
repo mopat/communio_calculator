@@ -11,6 +11,10 @@ var path = require('path');
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 
+//https://github.com/kelektiv/node-cron
+var cron = require('node-cron');
+
+
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
@@ -19,9 +23,15 @@ app.use(cors());
 
 // ## CORS middleware
 //
-var binPath = phantomjs.path
+var binPath = phantomjs.path;
 
-function updateMatchday() {
+cron.schedule('* * * * *', function () {
+    updateMatchdayFile();
+
+});
+
+function updateMatchdayFile() {
+    console.log("updateMatchdayFile");
     var childArgs = [
         path.join(__dirname, 'matchday-phantom.js'),
         'some other argument (passed to phantomjs script)'
@@ -32,7 +42,6 @@ function updateMatchday() {
         console.log(err);
     });
 }
-
 
 app.get('/matchday_results/:matchdayNum', function (req, res) {
     var matchdayNum = req.params.matchdayNum;
