@@ -18,6 +18,11 @@ app.use(cors());
 //
 
 
+app.get('/matchday_results/:matchdayNum', function (req, res) {
+    var matchdayNum = req.params.matchdayNum;
+    res.sendFile(matchdayNum + '.html', {root: __dirname});
+});
+
 app.get('/matchday_results', function (req, res) {
     res.sendFile('results.html', {root: __dirname});
 });

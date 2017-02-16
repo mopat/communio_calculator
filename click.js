@@ -8,8 +8,11 @@ page.onConsoleMessage = function(msg, lineNum, sourceId) {
 };
 page.onLoadFinished = function () {
     console.log("page load finished");
-    page.render('results.png');
+    var matchday = page.title.split('.')[0].trim();
+    page.render(matchday + '.png');
+    fs.write(matchday + '.html', page.content, 'w');
     fs.write('results.html', page.content, 'w');
+    console.log(page.title.split('.')[0].trim());
 };
 
 page.open(url, function (status) {
