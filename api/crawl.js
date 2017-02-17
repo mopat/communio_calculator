@@ -75,8 +75,10 @@ module.exports = (function () {
                                     points: points,
                                     updated_at_matchday: matchdayNum
                                 };
-                                if (updatePlayer.comunio_id != undefined) {
-                                    resolve(database.updatePlayer(updatePlayer));
+                                if (updatePlayer.comunio_id != undefined && updatePlayer.points != "") {
+                                    if (updatePlayer.points == "-" || !isNaN(parseInt(updatePlayer.points))) {
+                                        resolve(database.updatePlayer(updatePlayer));
+                                    }
                                 }
 
                             }
@@ -386,6 +388,7 @@ module.exports = (function () {
             ]);
         });
     }
+
     //for storing ion database
     function updateSquads() {
         var squads = [];
