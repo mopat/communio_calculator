@@ -188,12 +188,13 @@ module.exports = (function () {
                     var newPoints = parseInt(allPoints) + parseInt(points);
                     //  console.log(newPoints);
                     var matchday_key = "players.$." + updatePlayer.updated_at_matchday.toString();
+                    Model.update(query, {$set: {name: 'jason borne'}}, options, callback)
                     var set = {
                         updated_at_matchday: updatePlayer.updated_at_matchday,
                         "players.$.last_points": updatePlayer.points,
                         "players.$.all_points": newPoints,
                         "players.$.updated_at": Date.now(),
-                        "players.$.updated_at_matchday": updatePlayer.updated_at_matchday,
+                        "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
                     };
                     set[matchday_key] = points;
                     Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {

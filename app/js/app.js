@@ -29,10 +29,19 @@ function playerAutocomplete() {
                     for (var i = 0; i < response.length; i++) {
                         var playerData = response[i].players[0];
                         var playerName = playerData.name;
-                        var playerLastPoints = playerData.last_points;
+                        var $matchdaySelect = $('#matchday-select');
+                        var matchday = $matchdaySelect.val();
+                        var matchdayPoints = playerData[matchday];
                         var comunioID = playerData.comunio_id;
-                        console.log(playerName, playerLastPoints);
-                        $('#results').append(playerName + ": " + playerLastPoints + "; comunioID: " + comunioID + "<br>");
+                        if (matchdayPoints != undefined && matchdayPoints != null) {
+                            $('#results').append(playerName + ": " + matchdayPoints + "; comunioID: " + comunioID + "<br>");
+                        }
+                        else {
+                            $('#results').append("Keine Daten für diesen Speiltag vorhanden")
+
+                        }
+                        console.log(playerName, matchdayPoints);
+
                     }
                 },
                 error: function (error) {
@@ -54,17 +63,21 @@ function getMyPlayers() {
             success: function (response) {
                 console.log(response.players[0]);
                 $('#results').empty();
-
+                var $matchdaySelect = $('#matchday-select');
+                var matchday = $matchdaySelect.val();
                 var playerData = response.players[0];
                 var playerName = playerData.name;
-                var playerLastPoints = parseInt(playerData.last_points);
-                if (isNaN(playerLastPoints)) {
-                    playerLastPoints = 0;
+                var matchdayPoints = playerData[matchday];
+                /*  if (isNaN(matchdayPoints)) {
+                 matchdayPoints = 0;
+                 }*/
+                if (matchdayPoints != undefined && matchdayPoints != null) {
+                    squadPoints += parseInt(matchdayPoints);
                 }
-                squadPoints += playerLastPoints;
+
                 console.log(squadPoints);
                 var comunioID = playerData.comunio_id;
-                console.log(playerName, playerLastPoints);
+                console.log(playerName, matchdayPoints);
                 $('#results').append("Teampunkte: " + squadPoints);
 
             },
