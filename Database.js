@@ -3,7 +3,6 @@
  */
 var mongoose = require("mongoose");
 
-
 var Squad;
 var Player;
 var Matchday;
@@ -44,7 +43,7 @@ module.exports = (function () {
             played_matchdays: [String],
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now}
-        });
+        }, {strict: false});
 
         var squadSchema = mongoose.Schema({
             name: String,
@@ -58,12 +57,44 @@ module.exports = (function () {
             created_at: {type: Date, default: Date.now},
             updated_at: {type: Date, default: Date.now},
             updated_at_matchday: Number
-        });
+        }, {strict: false});
         squadSchema.set('collection', config.database);
         //Mongoose uses plural of model as collection, so collection name is "beers"
         // Matchday = mongoose.model("Matchday", matchday_details);
-        //Player = mongoose.model("Player", squadSchema);
+
+        Player = mongoose.model("Player", playerSchema);
         Squad = mongoose.model("Squad", squadSchema);
+
+        Player.update({}, {'players.$.21': false}, {}, function (err, players) {
+            if (err) {
+                console.log(err)
+            } else {
+                /*  var data = {
+                 name: players.players[0].name,
+                 _id: players.players[0]._id,
+                 comunio_id: players.players[0].comunio_id,
+                 full_url:  players.players[0].full_url,
+                 };*/
+                console.log("players")
+
+
+            }
+        });
+        /*     Squad.findOneAndUpdate({"players.comunio_id": 35}, {
+         $set: {
+         "players.$.21": ""
+         }
+
+         }, {
+         safe: true,
+         upsert: true,
+         new: true
+         }, function (err, updatedPlayer) {
+         //console.log(updatedPlayer.players[0].name)
+         if (err) {
+         console.log(err)
+         }
+         });*/
     }
 
     function connect() {
@@ -111,6 +142,7 @@ module.exports = (function () {
             });
         });
     }
+
     function insertSquad(squadObj) {
         var squad = new Squad(squadObj);
         return new Promise(function (resolve, reject) {
@@ -134,6 +166,10 @@ module.exports = (function () {
     }
 
     function updatePlayer(updatePlayer) {
+        /*        var objName = updatePlayer.updated_at_matchday.toString();
+         var addMatchdayObj = {};
+         addMatchdayObj[updatePlayer.updated_at_matchday.toString()]= String;
+         mongoose.model('Player').schema.add(addMatchdayObj);*/
         var points = updatePlayer.points;
         return new Promise(function (resolve, reject) {
             //db.comstats_16_17.findOne({'played_matchdays': {$nin: [21]} ,"players.comunio_id": "32508"}, {'players.$':1})
@@ -151,14 +187,17 @@ module.exports = (function () {
                     }
                     var newPoints = parseInt(allPoints) + parseInt(points);
                     //  console.log(newPoints);
+                    var matchday_key = "players.$." + updatePlayer.updated_at_matchday.toString();
+                    var set = {
+                        updated_at_matchday: updatePlayer.updated_at_matchday,
+                        "players.$.last_points": updatePlayer.points,
+                        "players.$.all_points": newPoints,
+                        "players.$.updated_at": Date.now(),
+                        "players.$.updated_at_matchday": updatePlayer.updated_at_matchday,
+                    };
+                    set[matchday_key] = points;
                     Squad.findOneAndUpdate({"players.comunio_id": updatePlayer.comunio_id}, {
-                        $set: {
-                            updated_at_matchday: updatePlayer.updated_at_matchday,
-                            "players.$.last_points": updatePlayer.points,
-                            "players.$.all_points": newPoints,
-                            "players.$.updated_at": Date.now(),
-                            "players.$.updated_at_matchday": updatePlayer.updated_at_matchday
-                        },
+                        $set: set,
                         $push: {
                             "players.$.points": updatePlayer.points,
                             "players.$.played_matchdays": updatePlayer.updated_at_matchday
