@@ -11,27 +11,26 @@ var database = require("./Database.js");
 var path = require('path');
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
+var request = require('request');
 
-//https://github.com/kelektiv/node-cron
+//https:www.npmjs.com/package/node-cron
 var cron = require('node-cron');
 
 
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
-app.use(cors());
+app.use(cors()); // ## CORS middleware
 
-
-// ## CORS middleware
-//
+var UPDATE_PLAYER_URL = "http://localhost:8000/update_players";
 var binPath = phantomjs.path;
 
-cron.schedule('* * * * *', function () {
+cron.schedule('* 15-23 * * 2,3,5,6,7', function () {
     updateMatchdayFile();
-
+    requestPlayerUpdate();
 });
 
-function updateMatchdayFile() {
+var updateMatchdayFile = function () {
     console.log("updateMatchdayFile");
     var childArgs = [
         path.join(__dirname, 'matchday-phantom.js'),
@@ -41,8 +40,19 @@ function updateMatchdayFile() {
     childProcess.execFile(binPath, childArgs, function (err, stdout, stderr) {
         // handle results
         console.log(err);
+        console.log(stdout);
     });
-}
+};
+
+var requestPlayerUpdate = function () {
+    request({
+        method: 'GET',
+        url: UPDATE_PLAYER_URL
+    }, function (err, response, body) {
+        if (err) return console.error(err);
+        console.log('Update Players');
+    });
+};
 
 app.get('/matchday_results/:matchdayNum', function (req, res) {
     var matchdayNum = req.params.matchdayNum;
