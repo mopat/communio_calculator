@@ -12,6 +12,7 @@ var path = require('path');
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 var request = require('request');
+var ws = require("nodejs-websocket")
 
 //https:www.npmjs.com/package/node-cron
 var cron = require('node-cron');
