@@ -12,7 +12,6 @@ var path = require('path');
 var childProcess = require('child_process');
 var phantomjs = require('phantomjs');
 var request = require('request');
-var ws = require("nodejs-websocket")
 
 //https:www.npmjs.com/package/node-cron
 var cron = require('node-cron');
@@ -30,17 +29,6 @@ cron.schedule('* 15-23 * * 2,3,5,6,7', function () {
     updateMatchdayFile();
     requestPlayerUpdate();
 });
-
-/*
- lt -s comstatsapi -p 8000
- var tunnel = localtunnel(port, function(err, tunnel) {
- if (err) console.log(err);
-
- // the assigned public url for your tunnel
- // i.e. https://abcdefgjhij.localtunnel.me
- cosnole.log(tunnel.url);
- cosnole.log(tunnel.url);
- });*/
 
 var updateMatchdayFile = function () {
     console.log("updateMatchdayFile");

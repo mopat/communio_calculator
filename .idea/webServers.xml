@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="4920e92f-c4aa-477a-8ca2-22cb6d649f9f" name="comstats.pajomo.de" url="http://comstats.pajomo.de">
+        <fileTransfer host="comstats.pajomo.de" port="21" rootFolder="/html/communio_calculator">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
