@@ -31,6 +31,17 @@ cron.schedule('* 15-23 * * 2,3,5,6,7', function () {
     requestPlayerUpdate();
 });
 
+/*
+ lt -s comstatsapi -p 8000
+ var tunnel = localtunnel(port, function(err, tunnel) {
+ if (err) console.log(err);
+
+ // the assigned public url for your tunnel
+ // i.e. https://abcdefgjhij.localtunnel.me
+ cosnole.log(tunnel.url);
+ cosnole.log(tunnel.url);
+ });*/
+
 var updateMatchdayFile = function () {
     console.log("updateMatchdayFile");
     var childArgs = [
