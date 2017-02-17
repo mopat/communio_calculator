@@ -15,8 +15,10 @@ var request = require('request');
 
 //https:www.npmjs.com/package/node-cron
 var cron = require('node-cron');
-
-
+var ngrok = require('ngrok');
+ngrok.connect(8000, function (err, url) {
+    console.log(url)
+});
 var app = express();
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies

@@ -2,7 +2,8 @@
  * Created by Patrick on 14.02.2017.
  */
 var API_URL = 'http://localhost:8000/';
-var API_URL = 'http://comstatsapi.localtunnel.me/';
+//var API_URL = 'http://comstatsapi.localtunnel.me/';
+//var API_URL = 'https://3cf5615d.ngrok.io/';
 var $matchdaySelect = $('#matchday-select');
 $(document).ready(function () {
     init();
