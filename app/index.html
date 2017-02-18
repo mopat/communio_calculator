@@ -3,30 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Title</title>
+    <script src="js/libs/jquery-3.1.1.min.js"></script>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <title>Brutale Comstats</title>
 </head>
 <body>
-<input type="text" id="find-player">
-<div id="results"></div>
-<label>
-    <select id="matchday-select">
-        <option value="20">
-            20
-        </option>
-        <option value="21" selected>
-            21
-        </option>
-        <option value="22">
-            22
-        </option>
-    </select>
-</label>
-<p><b>Teampunkte: <span id="squad-points"></b>
+<div class="row">
+    <div class="col s12">
+        <h3>Herzlich Willkommen bei Brutale Comstats</h3>
+    </div>
+</div>
+<div class="row">
+    <div class=" col s6">
 
-    </span></p>
+        <label>
+            Spielername
+            <input type="text" id="find-player">
+        </label>
+    </div>
+</div>
 
-<button id="update">Update</button>
-<script src="js/libs/jquery-3.1.1.min.js"></script>
+
+<div class="row">
+    <div class="col s1">
+        <label>
+            Spieltag
+            <select id="matchday-select">
+                <option value="20">
+                    20
+                </option>
+                <option value="21" selected>
+                    21
+                </option>
+                <option value="22">
+                    22
+                </option>
+            </select>
+        </label>
+    </div>
+</div>
+<div class="row">
+
+    <div class="col s6">
+        <div id="results"></div>
+
+        <p>
+            <b>Teampunkte: <span id="squad-points"></span></b>
+        </p>
+        <button id="update" class="waves-effect waves-light btn">Update Patricks Teampunkte</button>
+    </div>
+</div>
+
+
 <script src="js/app.js"></script>
 </body>
 </html>

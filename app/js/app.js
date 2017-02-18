@@ -3,9 +3,10 @@
  */
 var API_URL = 'http://localhost:8000/';
 //var API_URL = 'http://comstatsapi.localtunnel.me/';
-//var API_URL = 'https://45fc608c.ngrok.io';
+//var API_URL = 'https://45fc608c.ngrok.io/';
 var $matchdaySelect = $('#matchday-select');
 $(document).ready(function () {
+    $('select').material_select();
     init();
     getMyPlayers();
     $('#update').click(function () {
@@ -42,7 +43,7 @@ function playerAutocomplete() {
                             $('#results').append(playerName + ": " + matchdayPoints + "; comunioID: " + comunioID + "<br>");
                         }
                         else {
-                            $('#results').append("Keine Daten für diesen Speiltag vorhanden<br>")
+                            $('#results').append(playerName + ": Keine Daten für diesen Speiltag vorhanden<br>")
 
                         }
                         console.log(playerName, matchdayPoints);
