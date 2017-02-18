@@ -3,7 +3,7 @@
  */
 var API_URL = 'http://localhost:8000/';
 //var API_URL = 'http://comstatsapi.localtunnel.me/';
-//var API_URL = 'https://3cf5615d.ngrok.io/';
+//var API_URL = 'https://45fc608c.ngrok.io';
 var $matchdaySelect = $('#matchday-select');
 $(document).ready(function () {
     init();

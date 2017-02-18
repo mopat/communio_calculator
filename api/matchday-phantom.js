@@ -13,7 +13,9 @@ page.onLoadFinished = function () {
     fs.write(matchday + '.html', page.content, 'w');
     fs.write('results.html', page.content, 'w');
     console.log(page.title.split('.')[0].trim());
-    phantom.exit();
+    setTimeout(function () {
+        phantom.exit();
+    }, 50000);
 };
 
 page.open(url, function (status) {

@@ -27,7 +27,7 @@ app.use(cors()); // ## CORS middleware
 var UPDATE_PLAYER_URL = "http://localhost:8000/update_players";
 var binPath = phantomjs.path;
 
-cron.schedule('* 15-23 * * 2,3,5,6,7', function () {
+cron.schedule('* 11-23 * * 2,3,5,6,7', function () {
     updateMatchdayFile();
     requestPlayerUpdate();
 });

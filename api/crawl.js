@@ -53,6 +53,8 @@ module.exports = (function () {
 
                 // Tell Cherrio to load the HTML
                 $ = cheerio.load(body);
+                if ($('title').html() == null)
+                    return;
                 var matchdayNum = parseInt($('title').html().split('.')[0]);
                 $('.sptPaarDetails').each(function () {
                     var $table = $($(this).find('table'));
