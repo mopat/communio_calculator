@@ -20,6 +20,7 @@ page.onLoadFinished = function () {
 
 page.open(url, function (status) {
     page.evaluate(function () {
+        // class info, wenn noch keine Ergebnisse drin: .detailsInfo
         var showResults = document.getElementsByClassName('detailsPlus');
         for (var i = 0; i < showResults.length; i++) {
             if (showResults[i] != undefined)
