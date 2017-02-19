@@ -26,12 +26,19 @@ app.use(cors()); // ## CORS middleware
 
 var UPDATE_PLAYER_URL = "http://localhost:8000/update_players";
 var UPDATE_MATCHDAY_URL = "http://localhost:8000/update_matchday_results";
+var UPDATE_SQUADS_URL = "http://localhost:8000/update_squads";
+var UPDATE_PLAYER_INFOS_URL = "http://localhost:8000/update_player_infos";
 var binPath = phantomjs.path;
 
-cron.schedule('* * * * 2,3,5,6,7', function () {
+cron.schedule('* 15-23 * * 2,3,5,6,7', function () {
     updateMatchdayFile();
     requestPlayerUpdate();
     requestMatchdayUpdate();
+});
+
+cron.schedule('0 0 4-7 * *', function () {
+    requestSquadUpdate();
+    requestPlayerInfosUpdate();
 });
 
 var updateMatchdayFile = function () {
@@ -93,7 +100,7 @@ function requestMatchdayUpdate() {
 function requestSquadUpdate() {
     request({
         method: 'GET',
-        url: UPDATE_MATCHDAY_URL
+        url: UPDATE_SQUADS_URL
     }, function (err, response, body) {
         if (err) return console.error(err);
         /*
@@ -107,10 +114,29 @@ function requestSquadUpdate() {
          console.log("Connection closed")
          });
          }).listen(8001);*/
-        console.log('Update Matchday');
+        console.log('Update Squad');
     });
 }
-
+function requestPlayerInfosUpdate() {
+    request({
+        method: 'GET',
+        url: UPDATE_PLAYER_INFOS_URL
+    }, function (err, response, body) {
+        if (err) return console.error(err);
+        /*
+         var server = ws.createServer(function (conn) {
+         console.log("New connection")
+         conn.on("text", function (str) {
+         console.log("Received "+str)
+         conn.sendText(str.toUpperCase()+"!!!")
+         });
+         conn.on("close", function (code, reason) {
+         console.log("Connection closed")
+         });
+         }).listen(8001);*/
+        console.log('Update Player Infos');
+    });
+}
 app.get('/matchday_results/:matchdayNum', function (req, res) {
     var matchdayNum = req.params.matchdayNum;
     res.sendFile(matchdayNum + '.html', {root: __dirname});
