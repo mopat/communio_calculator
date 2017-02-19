@@ -2,7 +2,7 @@
  * Created by morcz on 21.01.2017.
  */
 var mongoose = require("mongoose");
-
+var utf8 = require('utf8');
 var Squad;
 var Player;
 var Matchday;
@@ -161,6 +161,34 @@ module.exports = (function () {
                     });
                 }
                 else resolve([]);
+            });
+        });
+    }
+
+    function updateMatchday(matchdayMatchData) {
+        return new Promise(function (resolve, reject) {
+            var matchday_key = matchdayMatchData.matchday_num;
+            var set = {updated_at: Date.now()};
+            set[matchday_key] = matchdayMatchData.formatted_result_and_time;
+
+            /*
+             // Unset field
+             Squad.update({}, {$unset: {"21": 1 }}, {multi: true}, function (err, squad) {
+             console.log(squad)
+             });
+             */
+
+            // Update home
+            Squad.update({name: matchdayMatchData.home}, {$set: set}, {multi: true}, function (err, updatedSquadMatchday) {
+                // Update away
+                Squad.update({name: matchdayMatchData.away}, {$set: set}, {multi: true}, function (err, updatedSquadMatchday) {
+                    if (err) {
+                        reject(err)
+                    }
+                    else {
+                        resolve(updatedSquadMatchday);
+                    }
+                });
             });
         });
     }
@@ -525,5 +553,6 @@ module.exports = (function () {
     that.updateSquad = updateSquad;
     that.updatePlayer = updatePlayer;
     that.updatePlayerInfos = updatePlayerInfos;
+    that.updateMatchday = updateMatchday;
     return that;
 })();

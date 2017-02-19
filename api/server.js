@@ -25,11 +25,13 @@ app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 app.use(cors()); // ## CORS middleware
 
 var UPDATE_PLAYER_URL = "http://localhost:8000/update_players";
+var UPDATE_MATCHDAY_URL = "http://localhost:8000/update_matchday_results";
 var binPath = phantomjs.path;
 
-cron.schedule('* 11-23 * * 2,3,5,6,7', function () {
+cron.schedule('* * * * 2,3,5,6,7', function () {
     updateMatchdayFile();
     requestPlayerUpdate();
+    requestMatchdayUpdate();
 });
 
 var updateMatchdayFile = function () {
@@ -67,6 +69,48 @@ var requestPlayerUpdate = function () {
     });
 };
 
+function requestMatchdayUpdate() {
+    request({
+        method: 'GET',
+        url: UPDATE_MATCHDAY_URL
+    }, function (err, response, body) {
+        if (err) return console.error(err);
+        /*
+         var server = ws.createServer(function (conn) {
+         console.log("New connection")
+         conn.on("text", function (str) {
+         console.log("Received "+str)
+         conn.sendText(str.toUpperCase()+"!!!")
+         });
+         conn.on("close", function (code, reason) {
+         console.log("Connection closed")
+         });
+         }).listen(8001);*/
+        console.log('Update Matchday');
+    });
+}
+
+function requestSquadUpdate() {
+    request({
+        method: 'GET',
+        url: UPDATE_MATCHDAY_URL
+    }, function (err, response, body) {
+        if (err) return console.error(err);
+        /*
+         var server = ws.createServer(function (conn) {
+         console.log("New connection")
+         conn.on("text", function (str) {
+         console.log("Received "+str)
+         conn.sendText(str.toUpperCase()+"!!!")
+         });
+         conn.on("close", function (code, reason) {
+         console.log("Connection closed")
+         });
+         }).listen(8001);*/
+        console.log('Update Matchday');
+    });
+}
+
 app.get('/matchday_results/:matchdayNum', function (req, res) {
     var matchdayNum = req.params.matchdayNum;
     res.sendFile(matchdayNum + '.html', {root: __dirname});
@@ -74,6 +118,10 @@ app.get('/matchday_results/:matchdayNum', function (req, res) {
 
 app.get('/matchday_results', function (req, res) {
     res.sendFile('results.html', {root: __dirname});
+});
+
+app.get('/update_matchday_results', function () {
+    crawl.updateMatchdayResults();
 });
 
 

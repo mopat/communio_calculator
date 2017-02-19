@@ -42,6 +42,60 @@ module.exports = (function () {
         });
     }
 
+    function updateMatchdayResults() {
+        return new Promise(function (resolve, reject) {
+            request({
+                method: 'GET',
+                url: MATCHDAY_RESULTS
+            }, function (err, response, body) {
+                if (err) return console.error(err);
+
+                // Tell Cherrio to load the HTML
+                $ = cheerio.load(body);
+                if ($('title').html() == null)
+                    return;
+                var matchdayNum = parseInt($('title').html().split('.')[0]);
+
+                var $spieltagChildDivs = $($('#spieltagDiv').find('div'));
+                var matchdayTime;
+                $spieltagChildDivs.each(function () {
+
+                    if ($(this).find('.sptDatumGr').length == 1) {
+                        matchdayTime = $(this).find('.sptDatumGr');
+                    }
+
+
+                    var matchdayResults = $(this).find('.stretch');
+                    var home = matchdayResults.find('.leftClub .clubname').text();
+                    var away = matchdayResults.find('.rightClub .clubname').text();
+                    var result = matchdayResults.find('.ergebnisGr').text();
+                    var fullResult = home + "|" + result + "|" + away;
+
+                    if (matchdayTime != undefined && home != undefined && away != undefined && result != undefined) {
+                        var day = matchdayTime.html().split(' ')[0];
+                        var time = matchdayTime.html().split(' ')[2];
+                        var date = matchdayTime.html().split(' ')[1] + "." + new Date().getFullYear();
+                        var formattedTime = day + " " + date + " " + time;
+                        var matchdayResultsAndTime = formattedTime + ";" + fullResult;
+                        var matchdayMatchData = {
+                            matchday_num: matchdayNum,
+                            home: home,
+                            away: away,
+                            result: result,
+                            formatted_result_and_time: matchdayResultsAndTime
+                        };
+                        resolve(database.updateMatchday(matchdayMatchData));
+                    }
+                });
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve($('.clubname').text().trim());
+                }
+            });
+        });
+    }
+
 
     function updatePlayers() {
         return new Promise(function (resolve, reject) {
@@ -506,5 +560,6 @@ module.exports = (function () {
     that.updateSquads = updateSquads;
     that.updatePlayers = updatePlayers;
     that.updaePlayerInfos = updaePlayerInfos;
+    that.updateMatchdayResults = updateMatchdayResults;
     return that;
 })();
