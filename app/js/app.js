@@ -3,10 +3,10 @@
  */
 var API_URL = 'http://localhost:8000/';
 //var API_URL = 'http://comstatsapi.localtunnel.me/';
-//var API_URL = 'https://45fc608c.ngrok.io/';
+//var API_URL = 'https://042fdcf3.ngrok.io/';
 var $matchdaySelect = $('#matchday-select');
 $(document).ready(function () {
-    $('select').material_select();
+    //  $('select').material_select();
     init();
     getMyPlayers();
     $('#update').click(function () {
@@ -59,7 +59,7 @@ function playerAutocomplete() {
 }
 
 function getMyPlayers() {
-    var playersComunioIDs = ['32192', '32099', '32522', '32323', '27620', '31273', '32632', '32205', '32584', '31596', '32342'];
+    var playersComunioIDs = ['32192', '32522', '32323', '27620', '31273', '32632', '32205', '32584', '31596', '32342', '31419'];
     var squadPoints = 0;
     $('#results').empty();
     for (var i = 0; i < playersComunioIDs.length; i++) {
